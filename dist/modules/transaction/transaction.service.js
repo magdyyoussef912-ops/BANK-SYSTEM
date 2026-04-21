@@ -9,9 +9,13 @@ const transaction_repository_1 = __importDefault(require("../../repositories/tra
 const account_repository_1 = __importDefault(require("../../repositories/account.repository"));
 const transaction_enum_1 = require("../../common/enum/transaction.enum");
 const account_enum_1 = require("../../common/enum/account.enum");
+const beneficiary_repository_1 = __importDefault(require("../../repositories/beneficiary.repository"));
+const user_repository_1 = __importDefault(require("../../repositories/user.repository"));
 class TransactionService {
     _transactionModel = new transaction_repository_1.default();
     _accountModel = new account_repository_1.default();
+    _userModel = new user_repository_1.default();
+    _beneficiaryModel = new beneficiary_repository_1.default();
     constructor() { }
     deposit = async (req, res, next) => {
         const { amount } = req.body;
@@ -70,6 +74,69 @@ class TransactionService {
             throw new error_global_handler_1.AppError("Transaction Not Found", 404);
         }
         (0, success_Responsive_1.successResponse)({ res, message: "Transaction Fetched Successfully", data: transaction });
+    };
+    transfer = async (req, res, next) => {
+        const { beneficiaryId, amount } = req.body;
+        const senderAccount = await this._accountModel.findOne({
+            filter: { userId: req.user._id }
+        });
+        if (!senderAccount) {
+            throw new error_global_handler_1.AppError("Account Not Found", 404);
+        }
+        const beneficiary = await this._beneficiaryModel.findOne({
+            filter: { _id: beneficiaryId }
+        });
+        if (!beneficiary) {
+            throw new error_global_handler_1.AppError("Beneficiary Not Found", 404);
+        }
+        const receiverAccount = await this._accountModel.findOne({
+            filter: { accountNumber: beneficiary.accountNumber }
+        });
+        if (!receiverAccount) {
+            throw new error_global_handler_1.AppError("Receiver Account Not Found", 404);
+        }
+        if (senderAccount.balance < amount) {
+            throw new error_global_handler_1.AppError("Insufficient Balance", 400);
+        }
+        await Promise.all([
+            this._accountModel.findOneAndUpdate({
+                filter: { userId: req.user?._id },
+                update: { $inc: { balance: -amount } },
+                options: { new: false }
+            }),
+            this._accountModel.findOneAndUpdate({
+                filter: { _id: receiverAccount._id },
+                update: { $inc: { balance: amount } },
+                options: { new: false }
+            })
+        ]);
+        const transfer = await this._transactionModel.create({
+            userId: req.user?._id,
+            accountId: senderAccount._id,
+            amount,
+            balanceBefore: senderAccount.balance,
+            balanceAfter: senderAccount.balance - amount,
+            type: transaction_enum_1.enumTransactionType.TRANSFER,
+            status: transaction_enum_1.enumTransactionStatus.SUCCESS
+        });
+        (0, success_Responsive_1.successResponse)({ res, message: "Transfer Successfully", data: transfer });
+    };
+    summary = async (req, res, next) => {
+        const summary = await this._transactionModel.aggregate([
+            {
+                $match: {
+                    userId: req.user?._id
+                }
+            },
+            {
+                $group: {
+                    _id: "$type",
+                    count: { $sum: 1 },
+                    totalAmount: { $sum: "$amount" }
+                }
+            }
+        ]);
+        (0, success_Responsive_1.successResponse)({ res, message: "Summary Fetched Successfully", data: summary });
     };
 }
 exports.default = new TransactionService();

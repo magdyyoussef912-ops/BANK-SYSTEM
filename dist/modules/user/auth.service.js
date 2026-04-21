@@ -17,7 +17,7 @@ class AuthService {
     _accountModel = new account_repository_1.default();
     constructor() { }
     signUP = async (req, res, next) => {
-        const { fullName, email, password } = req.body;
+        const { fullName, email, password, accountNumber } = req.body;
         if (await this._userModel.findOne({ filter: { email } })) {
             throw new error_global_handler_1.AppError("User already exists", 409);
         }
@@ -26,9 +26,14 @@ class AuthService {
             email,
             password: await (0, hash_security_1.Hash)({ plainText: password })
         });
+        if (accountNumber) {
+            if (await this._accountModel.findOne({ filter: { accountNumber } })) {
+                throw new error_global_handler_1.AppError("Account Number already exists", 409);
+            }
+        }
         const account = await this._accountModel.create({
             userId: user._id,
-            accountNumber: (0, account_enum_1.GenerateAccountNumber)(),
+            accountNumber: accountNumber || (0, account_enum_1.GenerateAccountNumber)(),
             balance: 0,
             currency: account_enum_1.enumCurrency.EGP,
             status: account_enum_1.enumStatusAccount.ACTIVE

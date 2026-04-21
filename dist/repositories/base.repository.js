@@ -30,5 +30,8 @@ class BaseRepository {
     async findOneAndDelete({ filter, options }) {
         return this._model.findOneAndDelete(filter, options);
     }
+    async aggregate(pipeline) {
+        return this._model.aggregate(pipeline);
+    }
 }
 exports.default = BaseRepository;

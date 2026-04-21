@@ -11,6 +11,8 @@ transactionRouter.patch("/deposit",Authentication,Validation(TV.depositSchema),t
 transactionRouter.patch("/withdraw",Authentication,Validation(TV.withdrawSchema),transactionService.withdraw)
 transactionRouter.get("/my",Authentication,transactionService.getAllTransactions)
 transactionRouter.get("/:id",Validation(TV.singleTransactionSchema),transactionService.getSingleTransaction)
+transactionRouter.post("/transfer",Authentication,Validation(TV.transferSchema),transactionService.transfer)
+transactionRouter.get("/my/summary",Authentication,transactionService.summary)
  
 
 export default transactionRouter

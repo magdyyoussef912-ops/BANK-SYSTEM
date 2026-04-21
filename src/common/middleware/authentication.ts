@@ -23,7 +23,6 @@ export const Authentication = async (req:Request,res:Response,next:NextFunction)
         throw new AppError("inValid token payload")
     }
     
-
     const user =  await new UserRepository().findOne({filter:{_id:decoded.id}})
     if (!user) {
         throw new AppError("User Not Found",409)

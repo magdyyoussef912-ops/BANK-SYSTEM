@@ -21,5 +21,5 @@ const beneficiarySchema = new mongoose_1.default.Schema({
     strict: true,
     strictQuery: true
 });
-const beneficiaryModel = mongoose_1.default.models.beneficiary || mongoose_1.default.model("account", beneficiarySchema);
+const beneficiaryModel = mongoose_1.default.models.beneficiary || mongoose_1.default.model("beneficiary", beneficiarySchema);
 exports.default = beneficiaryModel;

@@ -23,3 +23,13 @@ export const singleTransactionSchema = {
         )
     })
 }
+
+export const transferSchema = {
+    body : z.object({
+        beneficiaryId:z.string().refine(
+            (val) => Types.ObjectId.isValid(val),
+            { message: "Invalid Beneficiary ID" }
+        ),
+        amount:z.number().min(50,"Amount must be greater than 50")
+    })
+}

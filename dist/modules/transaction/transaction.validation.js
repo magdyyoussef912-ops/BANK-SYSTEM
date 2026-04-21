@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.singleTransactionSchema = exports.withdrawSchema = exports.depositSchema = void 0;
+exports.transferSchema = exports.singleTransactionSchema = exports.withdrawSchema = exports.depositSchema = void 0;
 const mongoose_1 = require("mongoose");
 const z = __importStar(require("zod"));
 exports.depositSchema = {
@@ -49,5 +49,11 @@ exports.withdrawSchema = {
 exports.singleTransactionSchema = {
     params: z.object({
         id: z.string().refine((val) => mongoose_1.Types.ObjectId.isValid(val), { message: "Invalid Transaction ID" })
+    })
+};
+exports.transferSchema = {
+    body: z.object({
+        beneficiaryId: z.string().refine((val) => mongoose_1.Types.ObjectId.isValid(val), { message: "Invalid Beneficiary ID" }),
+        amount: z.number().min(50, "Amount must be greater than 50")
     })
 };

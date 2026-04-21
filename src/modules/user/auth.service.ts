@@ -18,7 +18,7 @@ class AuthService {
     constructor(){}
 
     signUP = async (req:Request,res:Response,next:NextFunction) => {
-        const {fullName,email,password} = req.body
+        const {fullName,email,password,accountNumber} = req.body
 
         if ( await this._userModel.findOne({filter:{email}})) {
             throw new AppError("User already exists",409)
@@ -30,11 +30,16 @@ class AuthService {
             password:await Hash({plainText:password})
         })
 
-         
+        if (accountNumber) {
+            if(await this._accountModel.findOne({filter:{accountNumber}})){
+                throw new AppError("Account Number already exists",409)
+            }
+        }
+ 
 
         const account = await this._accountModel.create({
             userId:user._id,
-            accountNumber:GenerateAccountNumber(),
+            accountNumber: accountNumber || GenerateAccountNumber(),
             balance:0,
             currency:enumCurrency.EGP,
             status:enumStatusAccount.ACTIVE

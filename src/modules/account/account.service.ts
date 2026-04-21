@@ -2,6 +2,8 @@ import { NextFunction, Request, Response } from "express";
 import AccountRepository from "../../repositories/account.repository";
 import { AppError } from "../../common/utils/error.global.handler";
 import { successResponse } from "../../common/utils/success.Responsive";
+import TransactionRepository from "../../repositories/transaction.repository";
+import { enumTransactionType } from "../../common/enum/transaction.enum";
 
 
 
@@ -10,6 +12,7 @@ import { successResponse } from "../../common/utils/success.Responsive";
 class AccountService {
 
     private readonly _accountModel = new AccountRepository()
+    private readonly _transactionModel = new TransactionRepository()
     constructor(){}
 
     
@@ -26,8 +29,42 @@ class AccountService {
 
     }
 
-    
-    
+    status = async (req:Request,res:Response,next:NextFunction)=>{
+        const {from,to} = req.query
+        const account = await this._accountModel.findOne({filter:{userId:req.user?._id}})
+        if (!account) {
+            throw new AppError("Account Not Found",404)
+        }
+        
+        
+
+        const transaction = await this._transactionModel.find({
+            filter:{
+                accountNumber:account._id,
+                createdAt:{
+                    $gte:new Date(from as string),
+                    $lte:new Date(to as string)
+                }
+            }
+        })
+
+        const totalDeposit  = transaction
+        .filter(t => t.type === enumTransactionType.DEPOSIT)
+        .reduce((sum, t) => sum + t.amount, 0);
+
+    const totalWithdraw = transaction
+        .filter(t => t.type === enumTransactionType.WITHDRAWAL)
+        .reduce((sum, t) => sum + t.amount, 0);
+
+    const totalTransfer = transaction
+        .filter(t => t.type === enumTransactionType.TRANSFER)
+        .reduce((sum, t) => sum + t.amount, 0);
+
+
+        successResponse({res,message:"Account Status",data:{transaction,totalDeposit,totalWithdraw,totalTransfer} })
+    }
+
+
 }
 
 

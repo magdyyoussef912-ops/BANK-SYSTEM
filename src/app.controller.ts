@@ -9,6 +9,7 @@ import { checkConnectionDB } from "./DB/connectionDB"
 import authRouter from "./modules/user/auth.controller"
 import accountRouter from "./modules/account/account.controller"
 import transactionRouter from "./modules/transaction/transaction.controller"
+import beneficiaryRouter from "./modules/beneficiary/beneficiary.controller"
 
 const app = express()
 
@@ -38,6 +39,7 @@ export const bootstrap = () => {
     app.use("/auth",authRouter)
     app.use("/account",accountRouter)
     app.use("/transaction",transactionRouter)
+    app.use("/beneficiary",beneficiaryRouter)
 
     app.use("{/*demo}",(req:Request,res:Response,next:NextFunction) => {
         throw new AppError(`404 ${req.method} ${req.url} Not Found...`,404)

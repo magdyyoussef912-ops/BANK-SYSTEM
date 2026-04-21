@@ -15,6 +15,7 @@ const connectionDB_1 = require("./DB/connectionDB");
 const auth_controller_1 = __importDefault(require("./modules/user/auth.controller"));
 const account_controller_1 = __importDefault(require("./modules/account/account.controller"));
 const transaction_controller_1 = __importDefault(require("./modules/transaction/transaction.controller"));
+const beneficiary_controller_1 = __importDefault(require("./modules/beneficiary/beneficiary.controller"));
 const app = (0, express_1.default)();
 const port = config_service_1.PORT;
 const bootstrap = () => {
@@ -36,6 +37,7 @@ const bootstrap = () => {
     app.use("/auth", auth_controller_1.default);
     app.use("/account", account_controller_1.default);
     app.use("/transaction", transaction_controller_1.default);
+    app.use("/beneficiary", beneficiary_controller_1.default);
     app.use("{/*demo}", (req, res, next) => {
         throw new error_global_handler_1.AppError(`404 ${req.method} ${req.url} Not Found...`, 404);
     });

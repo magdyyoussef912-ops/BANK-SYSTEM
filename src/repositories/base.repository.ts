@@ -1,4 +1,4 @@
-import { HydratedDocument, Model, PopulateOptions, ProjectionType, QueryFilter, QueryOptions, Types, UpdateQuery } from "mongoose";
+import { HydratedDocument, Model, PipelineStage, PopulateOptions, ProjectionType, QueryFilter, QueryOptions, Types, UpdateQuery } from "mongoose";
 
 
 
@@ -77,6 +77,10 @@ class BaseRepository<TDocument>{
         }):
         Promise< HydratedDocument<TDocument>[] | null>{
         return this._model.findOneAndDelete(filter,options)
+    }
+
+    async aggregate(pipeline: PipelineStage[]): Promise<any[]> {
+        return this._model.aggregate(pipeline)
     }
     
     
