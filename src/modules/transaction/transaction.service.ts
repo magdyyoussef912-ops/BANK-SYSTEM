@@ -1,12 +1,13 @@
 import { NextFunction, Request, Response } from "express";
 import { AppError } from "../../common/utils/error.global.handler";
 import { successResponse } from "../../common/utils/success.Responsive";
-import TransactionRepository from "../../repositories/transaction.repository";
-import AccountRepository from "../../repositories/account.repository";
 import { enumTransactionStatus, enumTransactionType } from "../../common/enum/transaction.enum";
 import { enumStatusAccount } from "../../common/enum/account.enum";
-import BeneficiaryRepository from "../../repositories/beneficiary.repository";
-import UserRepository from "../../repositories/user.repository";
+import BeneficiaryRepository from "../beneficiary/beneficiary.repository";
+import AccountRepository from "../account/account.repository";
+import TransactionRepository from "./transaction.repository";
+import UserRepository from "../user/user.repository";
+import { startSession } from "mongoose";
 
 
 
@@ -72,20 +73,21 @@ class TransactionService {
   
     }
 
-
-
     getAllTransactions = async (req:Request,res:Response,next:NextFunction)=>{
+        const page = Number(req.query.page) || 1
+        const limit = Number(req.query.limit) || 10
+        const skip = (page - 1) * limit
         const transactions = await this._transactionModel.find({
-            filter:{userId:req.user?._id,status:enumStatusAccount.ACTIVE}
+            filter:{userId:req.user?._id},
+            options:{skip,limit}
         }) 
         successResponse({res,message:"Transactions Fetched Successfully",data:transactions})
-
     }
 
     getSingleTransaction = async (req:Request,res:Response,next:NextFunction)=>{
         const {id} = req.params
         const transaction = await this._transactionModel.findOne({
-            filter:{_id:id!,status:enumStatusAccount.ACTIVE}
+            filter:{_id:id!,userId:req.user?._id}
         }) 
         if(!transaction){
             throw new AppError("Transaction Not Found",404)
@@ -127,31 +129,43 @@ class TransactionService {
             throw new AppError("Insufficient Balance",400)
         }
 
-        await Promise.all([
-            this._accountModel.findOneAndUpdate({
-                filter:{userId:req.user?._id},
-                update:{$inc:{balance:-amount}},
-                options:{new:false}
-            }),
-            this._accountModel.findOneAndUpdate({
-                filter:{_id:receiverAccount._id},
-                update:{$inc:{balance:amount}},
-                options:{new:false}
+        const session = await startSession()
+        try {
+            session.startTransaction()
+            await Promise.all([
+                this._accountModel.findOneAndUpdate({
+                    filter:{userId:req.user?._id},
+                    update:{$inc:{balance:-amount}},
+                    options:{session}
+                }),
+                this._accountModel.findOneAndUpdate({
+                    filter:{_id:receiverAccount._id},
+                    update:{$inc:{balance:amount}},
+                    options:{session}
+                })
+            ])
+            const transfer = await this._transactionModel.create({
+                userId:req.user?._id,
+                accountId:senderAccount._id,
+                amount,
+                balanceBefore:senderAccount.balance,
+                balanceAfter:senderAccount.balance - amount,
+                type:enumTransactionType.TRANSFER,
+                status:enumTransactionStatus.SUCCESS
             })
-        ])
+            
+            await session.commitTransaction()
+    
+            successResponse({res,message:"Transfer Successfully",data:transfer})
+            
+        } catch (error) {
+            await session.abortTransaction()
+            throw new AppError(error as string,500)
+        } finally {
+            session.endSession()
+        }
 
-        const transfer = await this._transactionModel.create({
-            userId:req.user?._id,
-            accountId:senderAccount._id,
-            amount,
-            balanceBefore:senderAccount.balance,
-            balanceAfter:senderAccount.balance - amount,
-            type:enumTransactionType.TRANSFER,
-            status:enumTransactionStatus.SUCCESS
-        })
-        
 
-        successResponse({res,message:"Transfer Successfully",data:transfer})
 
     }
 

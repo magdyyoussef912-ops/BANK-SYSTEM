@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import AccountRepository from "../../repositories/account.repository";
 import { AppError } from "../../common/utils/error.global.handler";
 import { successResponse } from "../../common/utils/success.Responsive";
-import TransactionRepository from "../../repositories/transaction.repository";
 import { enumTransactionType } from "../../common/enum/transaction.enum";
+import AccountRepository from "./account.repository";
+import TransactionRepository from "../transaction/transaction.repository";
 
 
 

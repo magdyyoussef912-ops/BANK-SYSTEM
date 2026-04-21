@@ -3,10 +3,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const beneficiary_repository_1 = __importDefault(require("../../repositories/beneficiary.repository"));
 const error_global_handler_1 = require("../../common/utils/error.global.handler");
 const success_Responsive_1 = require("../../common/utils/success.Responsive");
-const user_repository_1 = __importDefault(require("../../repositories/user.repository"));
+const beneficiary_repository_1 = __importDefault(require("./beneficiary.repository"));
+const user_repository_1 = __importDefault(require("../user/user.repository"));
 class BeneficiaryService {
     _beneficiaryModel = new beneficiary_repository_1.default();
     _userModel = new user_repository_1.default();

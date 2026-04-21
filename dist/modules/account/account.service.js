@@ -3,11 +3,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const account_repository_1 = __importDefault(require("../../repositories/account.repository"));
 const error_global_handler_1 = require("../../common/utils/error.global.handler");
 const success_Responsive_1 = require("../../common/utils/success.Responsive");
-const transaction_repository_1 = __importDefault(require("../../repositories/transaction.repository"));
 const transaction_enum_1 = require("../../common/enum/transaction.enum");
+const account_repository_1 = __importDefault(require("./account.repository"));
+const transaction_repository_1 = __importDefault(require("../transaction/transaction.repository"));
 class AccountService {
     _accountModel = new account_repository_1.default();
     _transactionModel = new transaction_repository_1.default();

@@ -2,10 +2,9 @@
 
 
 
-
-import BaseRepository from "./base.repository";
 import { Model } from "mongoose";
-import transactionModel, { ITransaction } from "../DB/model/transaction.model";
+import BaseRepository from "../../repositories/base.repository";
+import transactionModel, { ITransaction } from "../../DB/model/transaction.model";
 
 
 

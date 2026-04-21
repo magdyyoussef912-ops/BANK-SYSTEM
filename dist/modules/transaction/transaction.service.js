@@ -5,12 +5,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const error_global_handler_1 = require("../../common/utils/error.global.handler");
 const success_Responsive_1 = require("../../common/utils/success.Responsive");
-const transaction_repository_1 = __importDefault(require("../../repositories/transaction.repository"));
-const account_repository_1 = __importDefault(require("../../repositories/account.repository"));
 const transaction_enum_1 = require("../../common/enum/transaction.enum");
 const account_enum_1 = require("../../common/enum/account.enum");
-const beneficiary_repository_1 = __importDefault(require("../../repositories/beneficiary.repository"));
-const user_repository_1 = __importDefault(require("../../repositories/user.repository"));
+const beneficiary_repository_1 = __importDefault(require("../beneficiary/beneficiary.repository"));
+const account_repository_1 = __importDefault(require("../account/account.repository"));
+const transaction_repository_1 = __importDefault(require("./transaction.repository"));
+const user_repository_1 = __importDefault(require("../user/user.repository"));
+const mongoose_1 = require("mongoose");
 class TransactionService {
     _transactionModel = new transaction_repository_1.default();
     _accountModel = new account_repository_1.default();
@@ -60,15 +61,19 @@ class TransactionService {
         (0, success_Responsive_1.successResponse)({ res, message: "Withdraw Successfully", data: account });
     };
     getAllTransactions = async (req, res, next) => {
+        const page = Number(req.query.page) || 1;
+        const limit = Number(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
         const transactions = await this._transactionModel.find({
-            filter: { userId: req.user?._id, status: account_enum_1.enumStatusAccount.ACTIVE }
+            filter: { userId: req.user?._id },
+            options: { skip, limit }
         });
         (0, success_Responsive_1.successResponse)({ res, message: "Transactions Fetched Successfully", data: transactions });
     };
     getSingleTransaction = async (req, res, next) => {
         const { id } = req.params;
         const transaction = await this._transactionModel.findOne({
-            filter: { _id: id, status: account_enum_1.enumStatusAccount.ACTIVE }
+            filter: { _id: id, userId: req.user?._id }
         });
         if (!transaction) {
             throw new error_global_handler_1.AppError("Transaction Not Found", 404);
@@ -98,28 +103,40 @@ class TransactionService {
         if (senderAccount.balance < amount) {
             throw new error_global_handler_1.AppError("Insufficient Balance", 400);
         }
-        await Promise.all([
-            this._accountModel.findOneAndUpdate({
-                filter: { userId: req.user?._id },
-                update: { $inc: { balance: -amount } },
-                options: { new: false }
-            }),
-            this._accountModel.findOneAndUpdate({
-                filter: { _id: receiverAccount._id },
-                update: { $inc: { balance: amount } },
-                options: { new: false }
-            })
-        ]);
-        const transfer = await this._transactionModel.create({
-            userId: req.user?._id,
-            accountId: senderAccount._id,
-            amount,
-            balanceBefore: senderAccount.balance,
-            balanceAfter: senderAccount.balance - amount,
-            type: transaction_enum_1.enumTransactionType.TRANSFER,
-            status: transaction_enum_1.enumTransactionStatus.SUCCESS
-        });
-        (0, success_Responsive_1.successResponse)({ res, message: "Transfer Successfully", data: transfer });
+        const session = await (0, mongoose_1.startSession)();
+        try {
+            session.startTransaction();
+            await Promise.all([
+                this._accountModel.findOneAndUpdate({
+                    filter: { userId: req.user?._id },
+                    update: { $inc: { balance: -amount } },
+                    options: { session }
+                }),
+                this._accountModel.findOneAndUpdate({
+                    filter: { _id: receiverAccount._id },
+                    update: { $inc: { balance: amount } },
+                    options: { session }
+                })
+            ]);
+            const transfer = await this._transactionModel.create({
+                userId: req.user?._id,
+                accountId: senderAccount._id,
+                amount,
+                balanceBefore: senderAccount.balance,
+                balanceAfter: senderAccount.balance - amount,
+                type: transaction_enum_1.enumTransactionType.TRANSFER,
+                status: transaction_enum_1.enumTransactionStatus.SUCCESS
+            });
+            await session.commitTransaction();
+            (0, success_Responsive_1.successResponse)({ res, message: "Transfer Successfully", data: transfer });
+        }
+        catch (error) {
+            await session.abortTransaction();
+            throw new error_global_handler_1.AppError(error, 500);
+        }
+        finally {
+            session.endSession();
+        }
     };
     summary = async (req, res, next) => {
         const summary = await this._transactionModel.aggregate([

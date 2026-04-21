@@ -5,10 +5,9 @@
 
 
 
-
-import BaseRepository from "./base.repository";
 import { Model } from "mongoose";
-import beneficiaryModel, { IBeneficiary } from "../DB/model/beneficiary.model";
+import BaseRepository from "../../repositories/base.repository";
+import beneficiaryModel, { IBeneficiary } from "../../DB/model/beneficiary.model";
 
 
 

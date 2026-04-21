@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import BeneficiaryRepository from "../../repositories/beneficiary.repository";
 import { AppError } from "../../common/utils/error.global.handler";
 import { successResponse } from "../../common/utils/success.Responsive";
 import { GenerateAccountNumber } from "../../common/enum/account.enum";
-import UserRepository from "../../repositories/user.repository";
+import BeneficiaryRepository from "./beneficiary.repository";
+import UserRepository from "../user/user.repository";
 
 
 

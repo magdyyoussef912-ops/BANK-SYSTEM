@@ -3,9 +3,9 @@
 
 
 
-import BaseRepository from "./base.repository";
 import { Model } from "mongoose";
-import accountModel, { IAccount } from "../DB/model/bankAccount.model";
+import BaseRepository from "../../repositories/base.repository";
+import accountModel, { IAccount } from "../../DB/model/bankAccount.model";
 
 
 

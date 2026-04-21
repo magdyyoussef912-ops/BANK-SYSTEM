@@ -6,8 +6,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Authentication = void 0;
 const error_global_handler_1 = require("../utils/error.global.handler");
 const config_service_1 = require("../../config/config.service");
-const token_service_1 = require("../utils/token.service");
-const user_repository_1 = __importDefault(require("../../repositories/user.repository"));
+const token_service_1 = require("../utils/security/token.service");
+const user_repository_1 = __importDefault(require("../../modules/user/user.repository"));
+const userRepository = new user_repository_1.default();
 const Authentication = async (req, res, next) => {
     const { authorization } = req.headers;
     if (!authorization) {
@@ -21,7 +22,7 @@ const Authentication = async (req, res, next) => {
     if (!decoded || typeof decoded !== "object" || !("id" in decoded)) {
         throw new error_global_handler_1.AppError("inValid token payload");
     }
-    const user = await new user_repository_1.default().findOne({ filter: { _id: decoded.id } });
+    const user = await userRepository.findOne({ filter: { _id: decoded.id } });
     if (!user) {
         throw new error_global_handler_1.AppError("User Not Found", 409);
     }

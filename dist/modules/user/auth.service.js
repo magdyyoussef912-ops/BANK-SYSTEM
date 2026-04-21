@@ -3,15 +3,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const user_repository_1 = __importDefault(require("../../repositories/user.repository"));
 const error_global_handler_1 = require("../../common/utils/error.global.handler");
 const hash_security_1 = require("../../common/utils/security/hash.security");
 const success_Responsive_1 = require("../../common/utils/success.Responsive");
 const node_crypto_1 = require("node:crypto");
-const token_service_1 = require("../../common/utils/token.service");
+const token_service_1 = require("../../common/utils/security/token.service");
 const config_service_1 = require("../../config/config.service");
 const account_enum_1 = require("../../common/enum/account.enum");
-const account_repository_1 = __importDefault(require("../../repositories/account.repository"));
+const account_repository_1 = __importDefault(require("../account/account.repository"));
+const user_repository_1 = __importDefault(require("./user.repository"));
 class AuthService {
     _userModel = new user_repository_1.default();
     _accountModel = new account_repository_1.default();
@@ -42,7 +42,7 @@ class AuthService {
     };
     signIN = async (req, res, next) => {
         const { email, password } = req.body;
-        const user = await this._userModel.findOne({ filter: { email } });
+        const user = await this._userModel.findOneWithPassword({ filter: { email } });
         if (!user) {
             throw new error_global_handler_1.AppError("User not found", 404);
         }
@@ -57,22 +57,11 @@ class AuthService {
             },
             secretOrPrivateKey: config_service_1.ACCESS_TOKEN_KEY,
             options: {
-                expiresIn: "1day",
+                expiresIn: "7days",
                 jwtid
             }
         });
-        const refresh_token = (0, token_service_1.GenerateToken)({
-            payload: {
-                id: user._id,
-                email: user.email
-            },
-            secretOrPrivateKey: config_service_1.REFRESH_TOKEN_KEY,
-            options: {
-                expiresIn: "1day",
-                jwtid
-            }
-        });
-        (0, success_Responsive_1.successResponse)({ res, message: "User logged in successfully", data: { access_token, refresh_token } });
+        (0, success_Responsive_1.successResponse)({ res, message: "User logged in successfully", data: access_token });
     };
 }
 exports.default = new AuthService();
