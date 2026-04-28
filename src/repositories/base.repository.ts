@@ -73,16 +73,31 @@ class BaseRepository<TDocument>{
     }:
         {
             filter: QueryFilter<TDocument>,
-            options: QueryOptions<TDocument>
+            options?: QueryOptions<TDocument>
         }):
         Promise< HydratedDocument<TDocument>[] | null>{
-        return this._model.findOneAndDelete(filter,options)
+        return this._model.findOneAndDelete(filter,{new:true,...options})
     }
 
     async aggregate(pipeline: PipelineStage[]): Promise<any[]> {
         return this._model.aggregate(pipeline)
     }
+
+    async deleteOne ({filter}: {filter: QueryFilter<TDocument>}):Promise<any>{
+        return this._model.deleteOne(filter)
+    }
+
+    async updateOne ({filter,update}: {filter: QueryFilter<TDocument>,update: UpdateQuery<TDocument>}):Promise<any>{
+        return this._model.updateOne(filter,update)
+    }
     
+    async deleteMany ({filter}: {filter: QueryFilter<TDocument>}):Promise<any>{
+        return this._model.deleteMany(filter)
+    }
+
+    async updateMany ({filter,update}: {filter: QueryFilter<TDocument>,update: UpdateQuery<TDocument>}):Promise<any>{
+        return this._model.updateMany(filter,update)
+    }
     
 }
 

@@ -12,10 +12,13 @@ const error_global_handler_1 = require("./common/utils/error.global.handler");
 const success_Responsive_1 = require("./common/utils/success.Responsive");
 const config_service_1 = require("./config/config.service");
 const connectionDB_1 = require("./DB/connectionDB");
-const auth_controller_1 = __importDefault(require("./modules/user/auth.controller"));
+const auth_controller_1 = __importDefault(require("./modules/auth/auth.controller"));
 const account_controller_1 = __importDefault(require("./modules/account/account.controller"));
 const transaction_controller_1 = __importDefault(require("./modules/transaction/transaction.controller"));
 const beneficiary_controller_1 = __importDefault(require("./modules/beneficiary/beneficiary.controller"));
+const card_controller_1 = __importDefault(require("./modules/card/card.controller"));
+const user_controller_1 = __importDefault(require("./modules/user/user.controller"));
+const redis_service_1 = __importDefault(require("./common/service/redis.service"));
 const app = (0, express_1.default)();
 const port = config_service_1.PORT;
 const bootstrap = () => {
@@ -31,6 +34,7 @@ const bootstrap = () => {
     });
     app.use(express_1.default.json(), (0, cors_1.default)(), (0, helmet_1.default)(), limiter);
     (0, connectionDB_1.checkConnectionDB)();
+    redis_service_1.default.connect();
     app.get("/", (req, res, next) => {
         (0, success_Responsive_1.successResponse)({ res, message: "Welcome to the Bank System..." });
     });
@@ -38,6 +42,8 @@ const bootstrap = () => {
     app.use("/account", account_controller_1.default);
     app.use("/transaction", transaction_controller_1.default);
     app.use("/beneficiary", beneficiary_controller_1.default);
+    app.use("/card", card_controller_1.default);
+    app.use("/user", user_controller_1.default);
     app.use("{/*demo}", (req, res, next) => {
         throw new error_global_handler_1.AppError(`404 ${req.method} ${req.url} Not Found...`, 404);
     });

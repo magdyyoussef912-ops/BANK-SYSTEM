@@ -10,7 +10,7 @@ const account_enum_1 = require("../../common/enum/account.enum");
 const beneficiary_repository_1 = __importDefault(require("../beneficiary/beneficiary.repository"));
 const account_repository_1 = __importDefault(require("../account/account.repository"));
 const transaction_repository_1 = __importDefault(require("./transaction.repository"));
-const user_repository_1 = __importDefault(require("../user/user.repository"));
+const user_repository_1 = __importDefault(require("../auth/user.repository"));
 const mongoose_1 = require("mongoose");
 class TransactionService {
     _transactionModel = new transaction_repository_1.default();

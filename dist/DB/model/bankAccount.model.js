@@ -29,6 +29,10 @@ const accountSchema = new mongoose_1.default.Schema({
         type: mongoose_1.default.Schema.Types.ObjectId,
         ref: "user",
         required: true
+    },
+    default: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true,
@@ -36,6 +40,11 @@ const accountSchema = new mongoose_1.default.Schema({
     strictQuery: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true }
+});
+accountSchema.virtual('cards', {
+    ref: 'CreditCard',
+    localField: '_id',
+    foreignField: 'accountId'
 });
 const accountModel = mongoose_1.default.models.account || mongoose_1.default.model("account", accountSchema);
 exports.default = accountModel;

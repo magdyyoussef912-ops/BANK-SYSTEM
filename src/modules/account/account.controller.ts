@@ -5,8 +5,9 @@ import { Validation } from "../../common/middleware/validation";
 import  * as AV from "./account.validation"
 const accountRouter =  Router()
 
-accountRouter.get("/me",Authentication,AccountService.getAccount)
 
+accountRouter.post("/create",Authentication,AccountService.create)
+accountRouter.get("/me",Authentication,AccountService.getAccount)
 accountRouter.get("/status",Authentication,Validation(AV.statusSchema),AccountService.status)
 
 export default accountRouter

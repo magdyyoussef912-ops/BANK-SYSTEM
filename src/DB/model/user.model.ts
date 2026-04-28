@@ -10,6 +10,7 @@ export interface IUser extends Document {
     role : RoleEnum
     createdAt:Date,
     updatedAt:Date
+    changeCredential:Date
 }
 
 
@@ -38,7 +39,8 @@ const userSchema = new mongoose.Schema<IUser>({
         type:String,
         enum:RoleEnum,
         default:RoleEnum.USER
-    }
+    },
+    changeCredential:Date
 },{
     timestamps:true,
     strict:true,

@@ -42,6 +42,7 @@ const authentication_1 = require("../../common/middleware/authentication");
 const validation_1 = require("../../common/middleware/validation");
 const AV = __importStar(require("./account.validation"));
 const accountRouter = (0, express_1.Router)();
+accountRouter.post("/create", authentication_1.Authentication, account_service_1.default.create);
 accountRouter.get("/me", authentication_1.Authentication, account_service_1.default.getAccount);
 accountRouter.get("/status", authentication_1.Authentication, (0, validation_1.Validation)(AV.statusSchema), account_service_1.default.status);
 exports.default = accountRouter;

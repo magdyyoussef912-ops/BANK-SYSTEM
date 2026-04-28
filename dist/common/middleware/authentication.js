@@ -7,7 +7,8 @@ exports.Authentication = void 0;
 const error_global_handler_1 = require("../utils/error.global.handler");
 const config_service_1 = require("../../config/config.service");
 const token_service_1 = require("../utils/security/token.service");
-const user_repository_1 = __importDefault(require("../../modules/user/user.repository"));
+const user_repository_1 = __importDefault(require("../../modules/auth/user.repository"));
+const redis_service_1 = __importDefault(require("../service/redis.service"));
 const userRepository = new user_repository_1.default();
 const Authentication = async (req, res, next) => {
     const { authorization } = req.headers;
@@ -25,6 +26,13 @@ const Authentication = async (req, res, next) => {
     const user = await userRepository.findOne({ filter: { _id: decoded.id } });
     if (!user) {
         throw new error_global_handler_1.AppError("User Not Found", 409);
+    }
+    if (user.changeCredential?.getTime() > decoded.iat * 1000) {
+        throw new error_global_handler_1.AppError("inValid Token");
+    }
+    const revoked_token_value = await redis_service_1.default.get(redis_service_1.default.revoked_token({ userId: decoded.id, jti: decoded.jti }));
+    if (revoked_token_value) {
+        throw new error_global_handler_1.AppError("inValid Token revoked");
     }
     req.user = user;
     req.decoded = decoded;

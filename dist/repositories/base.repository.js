@@ -28,10 +28,22 @@ class BaseRepository {
         return this._model.findOneAndUpdate(filter, update, { new: true, ...options });
     }
     async findOneAndDelete({ filter, options }) {
-        return this._model.findOneAndDelete(filter, options);
+        return this._model.findOneAndDelete(filter, { new: true, ...options });
     }
     async aggregate(pipeline) {
         return this._model.aggregate(pipeline);
+    }
+    async deleteOne({ filter }) {
+        return this._model.deleteOne(filter);
+    }
+    async updateOne({ filter, update }) {
+        return this._model.updateOne(filter, update);
+    }
+    async deleteMany({ filter }) {
+        return this._model.deleteMany(filter);
+    }
+    async updateMany({ filter, update }) {
+        return this._model.updateMany(filter, update);
     }
 }
 exports.default = BaseRepository;

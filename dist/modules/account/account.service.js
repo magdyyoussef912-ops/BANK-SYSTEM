@@ -8,6 +8,7 @@ const success_Responsive_1 = require("../../common/utils/success.Responsive");
 const transaction_enum_1 = require("../../common/enum/transaction.enum");
 const account_repository_1 = __importDefault(require("./account.repository"));
 const transaction_repository_1 = __importDefault(require("../transaction/transaction.repository"));
+const account_enum_1 = require("../../common/enum/account.enum");
 class AccountService {
     _accountModel = new account_repository_1.default();
     _transactionModel = new transaction_repository_1.default();
@@ -27,7 +28,7 @@ class AccountService {
         }
         const transaction = await this._transactionModel.find({
             filter: {
-                accountNumber: account._id,
+                accountNumber: account.accountNumber,
                 createdAt: {
                     $gte: new Date(from),
                     $lte: new Date(to)
@@ -44,6 +45,17 @@ class AccountService {
             .filter(t => t.type === transaction_enum_1.enumTransactionType.TRANSFER)
             .reduce((sum, t) => sum + t.amount, 0);
         (0, success_Responsive_1.successResponse)({ res, message: "Account Status", data: { transaction, totalDeposit, totalWithdraw, totalTransfer } });
+    };
+    create = async (req, res, next) => {
+        if (await this._accountModel.findOne({ filter: { userId: req.user?._id } })) {
+            throw new error_global_handler_1.AppError("Account Already Exist", 409);
+        }
+        const account = await this._accountModel.create({
+            userId: req.user?._id,
+            accountNumber: (0, account_enum_1.GenerateAccountNumber)(),
+            balance: 0,
+        });
+        (0, success_Responsive_1.successResponse)({ res, message: "Account Created", data: account });
     };
 }
 exports.default = new AccountService();

@@ -32,15 +32,18 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const auth_service_1 = __importDefault(require("./auth.service"));
 const validation_1 = require("../../common/middleware/validation");
 const UV = __importStar(require("./auth.validation"));
+const auth_service_1 = require("./auth.service");
+const authentication_1 = require("../../common/middleware/authentication");
+const authService = new auth_service_1.AuthService();
+const userService = new auth_service_1.UserService();
 const authRouter = (0, express_1.Router)({ strict: true });
-authRouter.post("/register", (0, validation_1.Validation)(UV.signupSchema), auth_service_1.default.signUP);
-authRouter.post("/login", (0, validation_1.Validation)(UV.signinSchema), auth_service_1.default.signIN);
+authRouter.post("/register", (0, validation_1.Validation)(UV.signupSchema), authService.signUP);
+authRouter.post("/login", (0, validation_1.Validation)(UV.signinSchema), authService.signIN);
+authRouter.post("/refresh-token", authService.refreshToken);
+authRouter.patch("/update-info", authentication_1.Authentication, (0, validation_1.Validation)(UV.updateInfoSchema), userService.updateInfo);
+authRouter.patch("/update-password", authentication_1.Authentication, (0, validation_1.Validation)(UV.updatePasswordSchema), userService.updatePassword);
 exports.default = authRouter;

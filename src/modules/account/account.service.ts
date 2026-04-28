@@ -4,6 +4,7 @@ import { successResponse } from "../../common/utils/success.Responsive";
 import { enumTransactionType } from "../../common/enum/transaction.enum";
 import AccountRepository from "./account.repository";
 import TransactionRepository from "../transaction/transaction.repository";
+import { GenerateAccountNumber } from "../../common/enum/account.enum";
 
 
 
@@ -40,7 +41,7 @@ class AccountService {
 
         const transaction = await this._transactionModel.find({
             filter:{
-                accountNumber:account._id,
+                accountNumber:account.accountNumber,
                 createdAt:{
                     $gte:new Date(from as string),
                     $lte:new Date(to as string)
@@ -62,6 +63,19 @@ class AccountService {
 
 
         successResponse({res,message:"Account Status",data:{transaction,totalDeposit,totalWithdraw,totalTransfer} })
+    }
+
+    create = async (req:Request,res:Response,next:NextFunction)=>{
+        
+        if (await this._accountModel.findOne({filter:{userId:req.user?._id}})) {
+            throw new AppError("Account Already Exist",409)
+        }
+        const account = await this._accountModel.create({
+            userId:req.user?._id,
+            accountNumber:GenerateAccountNumber(),
+            balance:0,
+        })
+        successResponse({res,message:"Account Created",data:account})
     }
 
 

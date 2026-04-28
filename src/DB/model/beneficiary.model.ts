@@ -33,6 +33,6 @@ const beneficiarySchema = new mongoose.Schema<IBeneficiary>({
 
 
 
-const beneficiaryModel = mongoose.models.beneficiary || mongoose.model<IBeneficiary>("account",beneficiarySchema)
+const beneficiaryModel = mongoose.models.beneficiary || mongoose.model<IBeneficiary>("beneficiary",beneficiarySchema)
 
 export default beneficiaryModel
