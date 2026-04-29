@@ -51,9 +51,9 @@ class cardService {
     };
     deleteCard = async (req, res, next) => {
         const { cardId } = req.params;
-        const card = await this._cardModel.findOne({ filter: { _id: cardId } });
+        const card = await this._cardModel.findOne({ filter: { _id: cardId, userId: req.user._id } });
         if (!card) {
-            throw new error_global_handler_1.AppError("Card Not Found", 404);
+            throw new error_global_handler_1.AppError("Card Not Found or You don't have access", 404);
         }
         const session = await mongoose_1.default.startSession();
         try {
@@ -86,6 +86,8 @@ class cardService {
         const session = await mongoose_1.default.startSession();
         try {
             session.startTransaction();
+            await this._cardModel.updateMany({ filter: { userId: req.user._id }, update: { default: false } });
+            await this._accountModel.updateMany({ filter: { userId: req.user._id }, update: { default: false } });
             await this._accountModel.updateOne({ filter: { _id: card.accountId }, update: { default: true } });
             await this._cardModel.updateOne({ filter: { _id: cardId }, update: { default: true } });
             await session.commitTransaction();

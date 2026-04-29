@@ -12,22 +12,41 @@ const account_repository_1 = __importDefault(require("../account/account.reposit
 const transaction_repository_1 = __importDefault(require("./transaction.repository"));
 const user_repository_1 = __importDefault(require("../auth/user.repository"));
 const mongoose_1 = require("mongoose");
+const card_repository_1 = __importDefault(require("../card/card.repository"));
 class TransactionService {
     _transactionModel = new transaction_repository_1.default();
     _accountModel = new account_repository_1.default();
     _userModel = new user_repository_1.default();
+    _cardModel = new card_repository_1.default();
     _beneficiaryModel = new beneficiary_repository_1.default();
-    constructor() { }
-    deposit = async (req, res, next) => {
-        const { amount } = req.body;
-        const account = await this._accountModel.findOneAndUpdate({
-            filter: { userId: req.user?._id, status: account_enum_1.enumStatusAccount.ACTIVE },
-            update: { $inc: { balance: amount } },
-            options: { new: false }
+    getAccountByCardOrDefault = async (userId, cardId) => {
+        if (cardId) {
+            const card = await this._cardModel.findOne({
+                filter: { userId, _id: cardId }
+            });
+            if (!card) {
+                throw new error_global_handler_1.AppError("Card Not Found", 404);
+            }
+            const account = await this._accountModel.findOne({
+                filter: { userId, _id: card.accountId }
+            });
+            if (!account) {
+                throw new error_global_handler_1.AppError("Account Not Found", 404);
+            }
+            return account;
+        }
+        const account = await this._accountModel.findOne({
+            filter: { userId, default: true, status: account_enum_1.enumStatusAccount.ACTIVE },
         });
         if (!account) {
             throw new error_global_handler_1.AppError("Account Not Found, or Account is Blocked", 404);
         }
+        return account;
+    };
+    constructor() { }
+    deposit = async (req, res, next) => {
+        const { amount, cardId } = req.body;
+        const account = await this.getAccountByCardOrDefault(req.user?._id, cardId);
         const deposit = await this._transactionModel.create({
             userId: req.user?._id,
             accountId: account._id,
@@ -37,17 +56,16 @@ class TransactionService {
             type: transaction_enum_1.enumTransactionType.DEPOSIT,
             status: transaction_enum_1.enumTransactionStatus.SUCCESS
         });
+        account.balance += amount;
+        account.updatedAt = new Date();
+        await account.save();
         (0, success_Responsive_1.successResponse)({ res, message: "Deposit Successfully", data: account });
     };
     withdraw = async (req, res, next) => {
-        const { amount } = req.body;
-        const account = await this._accountModel.findOneAndUpdate({
-            filter: { userId: req.user?._id, status: account_enum_1.enumStatusAccount.ACTIVE, balance: { $gte: amount } },
-            update: { $inc: { balance: -amount } },
-            options: { new: false }
-        });
-        if (!account) {
-            throw new error_global_handler_1.AppError("Account Not Found,balance is less than amount, or Account is Blocked", 404);
+        const { amount, cardId } = req.body;
+        const account = await this.getAccountByCardOrDefault(req.user?._id, cardId);
+        if (account.balance < amount) {
+            throw new error_global_handler_1.AppError("Insufficient Balance", 400);
         }
         const withdraw = await this._transactionModel.create({
             userId: req.user?._id,
@@ -58,38 +76,16 @@ class TransactionService {
             type: transaction_enum_1.enumTransactionType.WITHDRAWAL,
             status: transaction_enum_1.enumTransactionStatus.SUCCESS
         });
+        account.balance -= amount;
+        account.updatedAt = new Date();
+        await account.save();
         (0, success_Responsive_1.successResponse)({ res, message: "Withdraw Successfully", data: account });
     };
-    getAllTransactions = async (req, res, next) => {
-        const page = Number(req.query.page) || 1;
-        const limit = Number(req.query.limit) || 10;
-        const skip = (page - 1) * limit;
-        const transactions = await this._transactionModel.find({
-            filter: { userId: req.user?._id },
-            options: { skip, limit }
-        });
-        (0, success_Responsive_1.successResponse)({ res, message: "Transactions Fetched Successfully", data: transactions });
-    };
-    getSingleTransaction = async (req, res, next) => {
-        const { id } = req.params;
-        const transaction = await this._transactionModel.findOne({
-            filter: { _id: id, userId: req.user?._id }
-        });
-        if (!transaction) {
-            throw new error_global_handler_1.AppError("Transaction Not Found", 404);
-        }
-        (0, success_Responsive_1.successResponse)({ res, message: "Transaction Fetched Successfully", data: transaction });
-    };
     transfer = async (req, res, next) => {
-        const { beneficiaryId, amount } = req.body;
-        const senderAccount = await this._accountModel.findOne({
-            filter: { userId: req.user._id }
-        });
-        if (!senderAccount) {
-            throw new error_global_handler_1.AppError("Account Not Found", 404);
-        }
+        const { beneficiaryId, amount, cardId } = req.body;
+        const senderAccount = await this.getAccountByCardOrDefault(req.user?._id, cardId);
         const beneficiary = await this._beneficiaryModel.findOne({
-            filter: { _id: beneficiaryId }
+            filter: { _id: beneficiaryId, ownerUserId: req.user?._id }
         });
         if (!beneficiary) {
             throw new error_global_handler_1.AppError("Beneficiary Not Found", 404);
@@ -137,6 +133,26 @@ class TransactionService {
         finally {
             session.endSession();
         }
+    };
+    getAllTransactions = async (req, res, next) => {
+        const page = Number(req.query.page) || 1;
+        const limit = Number(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+        const transactions = await this._transactionModel.find({
+            filter: { userId: req.user?._id },
+            options: { skip, limit }
+        });
+        (0, success_Responsive_1.successResponse)({ res, message: "Transactions Fetched Successfully", data: transactions });
+    };
+    getSingleTransaction = async (req, res, next) => {
+        const { id } = req.params;
+        const transaction = await this._transactionModel.findOne({
+            filter: { _id: id, userId: req.user?._id }
+        });
+        if (!transaction) {
+            throw new error_global_handler_1.AppError("Transaction Not Found", 404);
+        }
+        (0, success_Responsive_1.successResponse)({ res, message: "Transaction Fetched Successfully", data: transaction });
     };
     summary = async (req, res, next) => {
         const summary = await this._transactionModel.aggregate([

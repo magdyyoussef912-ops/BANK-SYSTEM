@@ -66,9 +66,9 @@ class cardService{
 
         const {cardId} = req.params
 
-        const card = await this._cardModel.findOne({filter:{_id:cardId}})
+        const card = await this._cardModel.findOne({filter:{_id:cardId,userId:req.user._id}})
         if (!card) {
-            throw new AppError("Card Not Found", 404)
+            throw new AppError("Card Not Found or You don't have access", 404)
         }
         
         const session = await mongoose.startSession()
@@ -101,8 +101,9 @@ class cardService{
     setDefaultCard = async (req:Request,res:Response,next:NextFunction) => {
 
         const {cardId} = req.params
-
-        const card = await this._cardModel.findOne({filter:{_id:cardId}})
+        
+        const card = await this._cardModel.findOne({filter:{_id:cardId}}) 
+        
         if (!card) {
             throw new AppError("Card Not Found", 404)
         }
@@ -110,12 +111,14 @@ class cardService{
         const session = await mongoose.startSession()
   
         try {
-            session.startTransaction()
+            session.startTransaction()  
+            await this._cardModel.updateMany({filter:{userId:req.user._id},update:{default:false}})
+            await this._accountModel.updateMany({filter:{userId:req.user._id},update:{default:false}})
             await this._accountModel.updateOne({filter:{_id:card.accountId},update:{default:true}})
             await this._cardModel.updateOne({filter:{_id:cardId},update:{default:true}})
             await session.commitTransaction()
             successResponse({ res, message: "Card set as default successfully" })
-        } catch (error) {
+        } catch (error) { 
             await session.abortTransaction()
             throw new AppError(error as string, 500) 
         } finally {

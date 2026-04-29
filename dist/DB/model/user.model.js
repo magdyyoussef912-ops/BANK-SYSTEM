@@ -29,7 +29,12 @@ const userSchema = new mongoose_1.default.Schema({
         enum: user_enum_1.RoleEnum,
         default: user_enum_1.RoleEnum.USER
     },
-    changeCredential: Date
+    changeCredential: Date,
+    status: {
+        type: String,
+        enum: user_enum_1.StatusEnumUser,
+        default: user_enum_1.StatusEnumUser.Active
+    }
 }, {
     timestamps: true,
     strict: true,

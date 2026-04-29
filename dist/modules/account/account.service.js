@@ -28,7 +28,7 @@ class AccountService {
         }
         const transaction = await this._transactionModel.find({
             filter: {
-                accountNumber: account.accountNumber,
+                accountId: account._id,
                 createdAt: {
                     $gte: new Date(from),
                     $lte: new Date(to)

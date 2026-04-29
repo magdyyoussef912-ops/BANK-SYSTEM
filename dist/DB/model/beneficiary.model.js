@@ -8,6 +8,7 @@ const beneficiarySchema = new mongoose_1.default.Schema({
     accountNumber: {
         type: String,
         required: true,
+        ref: "account",
         unique: true
     },
     bankName: String,

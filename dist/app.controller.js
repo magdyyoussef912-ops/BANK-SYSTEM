@@ -19,6 +19,7 @@ const beneficiary_controller_1 = __importDefault(require("./modules/beneficiary/
 const card_controller_1 = __importDefault(require("./modules/card/card.controller"));
 const user_controller_1 = __importDefault(require("./modules/user/user.controller"));
 const redis_service_1 = __importDefault(require("./common/service/redis.service"));
+const admin_controller_1 = __importDefault(require("./modules/admin/admin.controller"));
 const app = (0, express_1.default)();
 const port = config_service_1.PORT;
 const bootstrap = () => {
@@ -44,6 +45,7 @@ const bootstrap = () => {
     app.use("/beneficiary", beneficiary_controller_1.default);
     app.use("/card", card_controller_1.default);
     app.use("/user", user_controller_1.default);
+    app.use("/admin", admin_controller_1.default);
     app.use("{/*demo}", (req, res, next) => {
         throw new error_global_handler_1.AppError(`404 ${req.method} ${req.url} Not Found...`, 404);
     });

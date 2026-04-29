@@ -24,7 +24,7 @@ export const Authentication = async (req: Request, res: Response, next: NextFunc
     if (!decoded || typeof decoded !== "object" || !("id" in decoded)) {
         throw new AppError("inValid token payload")
     }
-    
+
 
     const user = await userRepository.findOne({ filter: { _id: decoded.id } })
     if (!user) {
@@ -32,11 +32,11 @@ export const Authentication = async (req: Request, res: Response, next: NextFunc
     }
 
 
-    if (user.changeCredential?.getTime() > decoded.iat!*1000) {
+    if (user.changeCredential?.getTime() > decoded.iat! * 1000) {
         throw new AppError("inValid Token")
     }
 
-    const  revoked_token_value = await redisService.get(redisService.revoked_token({userId:decoded.id!,jti:decoded.jti! })) 
+    const revoked_token_value = await redisService.get(redisService.revoked_token({ userId: decoded.id!, jti: decoded.jti! }))
     if (revoked_token_value) {
         throw new AppError("inValid Token revoked")
     }

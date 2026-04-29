@@ -20,7 +20,7 @@ class AuthService {
     constructor() { }
 
     signUP = async (req: Request, res: Response, next: NextFunction) => {
-        const { fullName, email, password ,accountNumber } = req.body
+        const { fullName, email, password ,accountNumber,role } = req.body
 
         if (await this._userModel.findOne({ filter: { email } })) {
             throw new AppError("User already exists", 409)
@@ -29,7 +29,8 @@ class AuthService {
         const user = await this._userModel.create({
             fullName,
             email,
-            password: await Hash({ plainText: password })
+            password: await Hash({ plainText: password }),
+            role
         })
 
         // if (accountNumber) {
@@ -57,8 +58,9 @@ class AuthService {
 
     signIN = async (req: Request, res: Response, next: NextFunction) => {
         const { email, password } = req.body
+        
 
-        const user = await this._userModel.findOneWithPassword({ filter: { email } })
+        const user = await this._userModel.findOneWithPassword( { email } )
         if (!user) {
             throw new AppError("User not found", 404)
         }
@@ -91,8 +93,7 @@ class AuthService {
                 jwtid
             }
         })
-
-
+        
         successResponse({ res, message: "User logged in successfully", data: { access_token, refresh_token } })
 
 

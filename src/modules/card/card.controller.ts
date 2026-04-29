@@ -8,8 +8,8 @@ const creditCardRouter = Router({strict:true})
 
 
 creditCardRouter.post("/AddCard",Authentication,Validation(CV.addCaredSchema),cardService.addCard)
-creditCardRouter.delete("/deleteCard/:cardId",Validation(CV.delCardSchema),cardService.deleteCard)
 creditCardRouter.get("/getAllCards",Authentication,cardService.getAllCards)
-creditCardRouter.patch("/setDefaultCard/:cardId",Validation(CV.setDefaultCardSchema),cardService.setDefaultCard)
+creditCardRouter.patch("/setDefaultCard/:cardId",Authentication,Validation(CV.setDefaultCardSchema),cardService.setDefaultCard)
+creditCardRouter.delete("/deleteCard/:cardId",Authentication,Validation(CV.delCardSchema),cardService.deleteCard)
 
 export default creditCardRouter  

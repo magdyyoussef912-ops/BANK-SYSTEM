@@ -1,4 +1,4 @@
-import { HydratedDocument, Model, PipelineStage, PopulateOptions, ProjectionType, QueryFilter, QueryOptions, Types, UpdateQuery } from "mongoose";
+import { HydratedDocument, Model, MongooseUpdateQueryOptions , PipelineStage, PopulateOptions, ProjectionType, QueryFilter, QueryOptions, Types, UpdateQuery } from "mongoose";
 
 
 
@@ -87,16 +87,17 @@ class BaseRepository<TDocument>{
         return this._model.deleteOne(filter)
     }
 
-    async updateOne ({filter,update}: {filter: QueryFilter<TDocument>,update: UpdateQuery<TDocument>}):Promise<any>{
-        return this._model.updateOne(filter,update)
-    }
     
     async deleteMany ({filter}: {filter: QueryFilter<TDocument>}):Promise<any>{
         return this._model.deleteMany(filter)
     }
-
-    async updateMany ({filter,update}: {filter: QueryFilter<TDocument>,update: UpdateQuery<TDocument>}):Promise<any>{
-        return this._model.updateMany(filter,update)
+    
+    async updateOne ({filter,update,options={}}: {filter: QueryFilter<TDocument>,update: UpdateQuery<TDocument>,options?:  MongooseUpdateQueryOptions<TDocument> & any}):Promise<any>{
+        return this._model.updateOne(filter,update,options)
+    } 
+    
+    async updateMany ({filter,update,options={}}: {filter: QueryFilter<TDocument>,update: UpdateQuery<TDocument>,options?: MongooseUpdateQueryOptions<TDocument> & any}):Promise<any>{
+        return this._model.updateMany(filter,update,options)
     }
     
 }

@@ -16,6 +16,7 @@ const beneficiarySchema = new mongoose.Schema<IBeneficiary>({
     accountNumber:{
         type:String,
         required:true,
+        ref:"account",
         unique:true
     }, 
     bankName:String,      

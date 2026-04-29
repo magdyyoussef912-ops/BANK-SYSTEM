@@ -1,6 +1,6 @@
 import mongoose, { Document } from "mongoose";
 
-import { RoleEnum } from "../../common/enum/user.enum";
+import { RoleEnum, StatusEnumUser } from "../../common/enum/user.enum";
 
 
 export interface IUser extends Document {
@@ -11,6 +11,7 @@ export interface IUser extends Document {
     createdAt:Date,
     updatedAt:Date
     changeCredential:Date
+    status:StatusEnumUser
 }
 
 
@@ -40,7 +41,12 @@ const userSchema = new mongoose.Schema<IUser>({
         enum:RoleEnum,
         default:RoleEnum.USER
     },
-    changeCredential:Date
+    changeCredential:Date,
+    status:{
+        type:String,
+        enum:StatusEnumUser,
+        default:StatusEnumUser.Active
+    }
 },{
     timestamps:true,
     strict:true,

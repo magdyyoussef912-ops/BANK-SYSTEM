@@ -36,14 +36,14 @@ class BaseRepository {
     async deleteOne({ filter }) {
         return this._model.deleteOne(filter);
     }
-    async updateOne({ filter, update }) {
-        return this._model.updateOne(filter, update);
-    }
     async deleteMany({ filter }) {
         return this._model.deleteMany(filter);
     }
-    async updateMany({ filter, update }) {
-        return this._model.updateMany(filter, update);
+    async updateOne({ filter, update, options = {} }) {
+        return this._model.updateOne(filter, update, options);
+    }
+    async updateMany({ filter, update, options = {} }) {
+        return this._model.updateMany(filter, update, options);
     }
 }
 exports.default = BaseRepository;

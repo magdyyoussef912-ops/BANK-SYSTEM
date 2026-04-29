@@ -38,12 +38,14 @@ const mongoose_1 = require("mongoose");
 const z = __importStar(require("zod"));
 exports.depositSchema = {
     body: z.object({
-        amount: z.number().min(50, "Amount must be greater than 50")
+        amount: z.number().min(50, "Amount must be greater than 50"),
+        cardId: z.string().refine((val) => mongoose_1.Types.ObjectId.isValid(val), { message: "Invalid Card ID" }).optional()
     })
 };
 exports.withdrawSchema = {
     body: z.object({
-        amount: z.number().min(50, "Amount must be greater than 50")
+        amount: z.number().min(50, "Amount must be greater than 50"),
+        cardId: z.string().refine((val) => mongoose_1.Types.ObjectId.isValid(val), { message: "Invalid Card ID" }).optional()
     })
 };
 exports.singleTransactionSchema = {
@@ -54,6 +56,7 @@ exports.singleTransactionSchema = {
 exports.transferSchema = {
     body: z.object({
         beneficiaryId: z.string().refine((val) => mongoose_1.Types.ObjectId.isValid(val), { message: "Invalid Beneficiary ID" }),
-        amount: z.number().min(50, "Amount must be greater than 50")
+        amount: z.number().min(50, "Amount must be greater than 50"),
+        cardId: z.string().refine((val) => mongoose_1.Types.ObjectId.isValid(val), { message: "Invalid Card ID" }).optional()
     })
 };

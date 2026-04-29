@@ -10,10 +10,12 @@ const transactionRouter =  Router()
 transactionRouter.patch("/deposit",Authentication,Validation(TV.depositSchema),transactionService.deposit)
 transactionRouter.patch("/withdraw",Authentication,Validation(TV.withdrawSchema),transactionService.withdraw)
 transactionRouter.post("/transfer",Authentication,Validation(TV.transferSchema),transactionService.transfer)
+
+// transaction history
 transactionRouter.get("/my",Authentication,transactionService.getAllTransactions)
-transactionRouter.get("/my/summary",Authentication,transactionService.summary)
 transactionRouter.get("/:id",Authentication,Validation(TV.singleTransactionSchema),transactionService.getSingleTransaction)
- 
+transactionRouter.get("/my/summary",Authentication,transactionService.summary)
+
 
 export default transactionRouter
- 
+  

@@ -18,20 +18,21 @@ class AuthService {
     _redisService = redis_service_1.default;
     constructor() { }
     signUP = async (req, res, next) => {
-        const { fullName, email, password, accountNumber } = req.body;
+        const { fullName, email, password, accountNumber, role } = req.body;
         if (await this._userModel.findOne({ filter: { email } })) {
             throw new error_global_handler_1.AppError("User already exists", 409);
         }
         const user = await this._userModel.create({
             fullName,
             email,
-            password: await (0, hash_security_1.Hash)({ plainText: password })
+            password: await (0, hash_security_1.Hash)({ plainText: password }),
+            role
         });
         (0, success_Responsive_1.successResponse)({ res, message: "User created successfully", data: { user } });
     };
     signIN = async (req, res, next) => {
         const { email, password } = req.body;
-        const user = await this._userModel.findOneWithPassword({ filter: { email } });
+        const user = await this._userModel.findOneWithPassword({ email });
         if (!user) {
             throw new error_global_handler_1.AppError("User not found", 404);
         }

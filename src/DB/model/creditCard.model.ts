@@ -1,9 +1,10 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { cardStatus, cardType } from "../../common/enum/creditcard.enum";
 
 
 
 export interface ICreditCard {
+    // _id:Types.ObjectId
     accountId:mongoose.Types.ObjectId
     userId:mongoose.Types.ObjectId
     bankName:string

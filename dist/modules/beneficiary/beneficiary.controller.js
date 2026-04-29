@@ -43,4 +43,6 @@ const validation_1 = require("../../common/middleware/validation");
 const BV = __importStar(require("./beneficiary.validation"));
 const beneficiaryRouter = (0, express_1.Router)();
 beneficiaryRouter.post("/addBeneficiary", authentication_1.Authentication, (0, validation_1.Validation)(BV.createBeneSchema), beneficiary_service_1.default.createBeneficiary);
+beneficiaryRouter.get("/getAllBeneficiary", authentication_1.Authentication, beneficiary_service_1.default.getAllBeneficiary);
+beneficiaryRouter.delete("/deleteBeneficiary/:id", authentication_1.Authentication, beneficiary_service_1.default.deleteBeneficiary);
 exports.default = beneficiaryRouter;

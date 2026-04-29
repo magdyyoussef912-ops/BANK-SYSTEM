@@ -46,6 +46,6 @@ transactionRouter.patch("/deposit", authentication_1.Authentication, (0, validat
 transactionRouter.patch("/withdraw", authentication_1.Authentication, (0, validation_1.Validation)(TV.withdrawSchema), transaction_service_1.default.withdraw);
 transactionRouter.post("/transfer", authentication_1.Authentication, (0, validation_1.Validation)(TV.transferSchema), transaction_service_1.default.transfer);
 transactionRouter.get("/my", authentication_1.Authentication, transaction_service_1.default.getAllTransactions);
-transactionRouter.get("/my/summary", authentication_1.Authentication, transaction_service_1.default.summary);
 transactionRouter.get("/:id", authentication_1.Authentication, (0, validation_1.Validation)(TV.singleTransactionSchema), transaction_service_1.default.getSingleTransaction);
+transactionRouter.get("/my/summary", authentication_1.Authentication, transaction_service_1.default.summary);
 exports.default = transactionRouter;
