@@ -33,7 +33,18 @@ const bootstrap = () => {
         standardHeaders: true,
         legacyHeaders: false,
     });
-    app.use(express_1.default.json(), (0, cors_1.default)(), (0, helmet_1.default)(), limiter);
+    const corsOptions = {
+        origin: function (origin, callback) {
+            if ([...config_service_1.WHITE_LIST].includes(origin)) {
+                callback(null, true);
+            }
+            else {
+                callback(new error_global_handler_1.AppError("Not allowed by CORS", 403));
+            }
+        },
+        credentials: true
+    };
+    app.use(express_1.default.json(), (0, cors_1.default)(corsOptions), (0, helmet_1.default)(), limiter);
     (0, connectionDB_1.checkConnectionDB)();
     redis_service_1.default.connect();
     app.get("/", (req, res, next) => {

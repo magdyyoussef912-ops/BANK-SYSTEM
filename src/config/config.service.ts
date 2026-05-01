@@ -15,3 +15,4 @@ export const ACCESS_TOKEN_KEY :string = process.env.ACCESS_TOKEN_KEY!
 export const PREFIX :string = process.env.PREFIX!
 export const REFRESH_TOKEN_KEY :string = process.env.REFRESH_TOKEN_KEY!
 export const REDIS_URL :string = process.env.REDIS_URL!
+export const WHITE_LIST = process.env.WHITE_LIST? process.env.WHITE_LIST.split(","):[] 

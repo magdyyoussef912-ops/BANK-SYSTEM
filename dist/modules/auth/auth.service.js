@@ -18,7 +18,7 @@ class AuthService {
     _redisService = redis_service_1.default;
     constructor() { }
     signUP = async (req, res, next) => {
-        const { fullName, email, password, accountNumber, role } = req.body;
+        const { fullName, email, password, accountNumber } = req.body;
         if (await this._userModel.findOne({ filter: { email } })) {
             throw new error_global_handler_1.AppError("User already exists", 409);
         }
@@ -26,7 +26,6 @@ class AuthService {
             fullName,
             email,
             password: await (0, hash_security_1.Hash)({ plainText: password }),
-            role
         });
         (0, success_Responsive_1.successResponse)({ res, message: "User created successfully", data: { user } });
     };

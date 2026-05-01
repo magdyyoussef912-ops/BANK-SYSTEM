@@ -4,7 +4,7 @@ import helmet from "helmet"
 import rateLimit from "express-rate-limit"
 import { AppError, globalErrorHandler } from "./common/utils/error.global.handler"
 import { successResponse } from "./common/utils/success.Responsive"
-import { PORT } from "./config/config.service"
+import { PORT ,WHITE_LIST } from "./config/config.service"
 import { checkConnectionDB } from "./DB/connectionDB"
 import authRouter from "./modules/auth/auth.controller"
 import accountRouter from "./modules/account/account.controller"
@@ -32,7 +32,18 @@ export const bootstrap = () => {
         legacyHeaders: false,
     })
 
-    app.use(express.json(), cors(), helmet(), limiter)
+    const corsOptions = {
+        origin: function(origin:string|undefined, callback:Function) {
+            if([...WHITE_LIST].includes(origin!)) {
+                callback(null, true)
+            } else {
+                callback(new AppError("Not allowed by CORS", 403))
+            }
+        },
+        credentials: true
+    }
+
+    app.use(express.json(), cors(corsOptions), helmet(), limiter)
 
     checkConnectionDB()
 

@@ -20,7 +20,7 @@ class AuthService {
     constructor() { }
 
     signUP = async (req: Request, res: Response, next: NextFunction) => {
-        const { fullName, email, password ,accountNumber,role } = req.body
+        const { fullName, email, password ,accountNumber } = req.body
 
         if (await this._userModel.findOne({ filter: { email } })) {
             throw new AppError("User already exists", 409)
@@ -30,7 +30,6 @@ class AuthService {
             fullName,
             email,
             password: await Hash({ plainText: password }),
-            role
         })
 
         // if (accountNumber) {

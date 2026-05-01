@@ -13,8 +13,8 @@ transactionRouter.post("/transfer",Authentication,Validation(TV.transferSchema),
 
 // transaction history
 transactionRouter.get("/my",Authentication,transactionService.getAllTransactions)
-transactionRouter.get("/:id",Authentication,Validation(TV.singleTransactionSchema),transactionService.getSingleTransaction)
 transactionRouter.get("/my/summary",Authentication,transactionService.summary)
+transactionRouter.get("/:id",Authentication,Validation(TV.singleTransactionSchema),transactionService.getSingleTransaction)
 
 
 export default transactionRouter
