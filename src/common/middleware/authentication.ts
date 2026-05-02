@@ -17,6 +17,7 @@ export const Authentication = async (req: Request, res: Response, next: NextFunc
         throw new AppError("Token Not Found")
     }
     const [prefix, token]: string[] = authorization.split(" ")
+    
     if (prefix !== PREFIX) {
         throw new AppError("inValid Prefix")
     }

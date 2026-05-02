@@ -35,7 +35,7 @@ const bootstrap = () => {
     });
     const corsOptions = {
         origin: function (origin, callback) {
-            if ([...config_service_1.WHITE_LIST].includes(origin)) {
+            if ([...config_service_1.WHITE_LIST, undefined].includes(origin)) {
                 callback(null, true);
             }
             else {
@@ -51,11 +51,11 @@ const bootstrap = () => {
         (0, success_Responsive_1.successResponse)({ res, message: "Welcome to the Bank System..." });
     });
     app.use("/auth", auth_controller_1.default);
+    app.use("/user", user_controller_1.default);
     app.use("/account", account_controller_1.default);
     app.use("/transaction", transaction_controller_1.default);
     app.use("/beneficiary", beneficiary_controller_1.default);
     app.use("/card", card_controller_1.default);
-    app.use("/user", user_controller_1.default);
     app.use("/admin", admin_controller_1.default);
     app.use("{/*demo}", (req, res, next) => {
         throw new error_global_handler_1.AppError(`404 ${req.method} ${req.url} Not Found...`, 404);

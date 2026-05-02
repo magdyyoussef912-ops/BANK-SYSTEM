@@ -42,6 +42,8 @@ class UserService {
             filter: { _id: user._id },
             update: { password: hashNPassword },
         });
+        user.changeCredential = new Date();
+        await user.save();
         (0, success_Responsive_1.successResponse)({ res, message: "Your password updated successfully" });
     };
     getUser = async (req, res, next) => {

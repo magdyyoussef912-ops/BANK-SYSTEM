@@ -109,7 +109,7 @@ class cardService{
         }
         
         const session = await mongoose.startSession()
-  
+
         try {
             session.startTransaction()  
             await this._cardModel.updateMany({filter:{userId:req.user._id},update:{default:false}})

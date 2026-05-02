@@ -21,7 +21,8 @@ class AccountService {
         (0, success_Responsive_1.successResponse)({ res, message: "Account Found", data: account });
     };
     status = async (req, res, next) => {
-        const { from, to } = req.query;
+        const from = new Date(req.query.from);
+        const to = new Date(req.query.to);
         const account = await this._accountModel.findOne({ filter: { userId: req.user?._id } });
         if (!account) {
             throw new error_global_handler_1.AppError("Account Not Found", 404);
@@ -30,8 +31,8 @@ class AccountService {
             filter: {
                 accountId: account._id,
                 createdAt: {
-                    $gte: new Date(from),
-                    $lte: new Date(to)
+                    $gte: new Date(from.setHours(0, 0, 0, 0)),
+                    $lte: new Date(to.setHours(23, 59, 59, 999))
                 }
             }
         });

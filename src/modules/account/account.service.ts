@@ -31,20 +31,19 @@ class AccountService {
     }
 
     status = async (req:Request,res:Response,next:NextFunction)=>{
-        const {from,to} = req.query
+        const from = new Date(req.query.from as string)
+        const to = new Date(req.query.to as string)
         const account = await this._accountModel.findOne({filter:{userId:req.user?._id}})
         if (!account) {
             throw new AppError("Account Not Found",404)
         }
-        
-        
 
         const transaction = await this._transactionModel.find({
             filter:{
                 accountId:account._id,
                 createdAt:{
-                    $gte:new Date(from as string),
-                    $lte:new Date(to as string)
+                    $gte:new Date(from.setHours(0, 0, 0, 0)) ,
+                    $lte:new Date(to.setHours(23, 59, 59, 999)) 
                 }
             }
         })

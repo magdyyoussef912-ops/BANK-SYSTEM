@@ -32,22 +32,6 @@ class AuthService {
             password: await Hash({ plainText: password }),
         })
 
-        // if (accountNumber) {
-        //     if (await this._accountModel.findOne({ filter: { accountNumber } })) {
-        //         throw new AppError("Account Number already exists", 409)
-        //     }
-        // }
-
-
-        // const account = await this._accountModel.create({
-        //     userId: user._id,
-        //     accountNumber: accountNumber || GenerateAccountNumber(),
-        //     balance: 0,
-        //     currency: enumCurrency.EGP,
-        //     status: enumStatusAccount.ACTIVE
-        // })
-
-        // successResponse({ res, message: "User created successfully", data: { user, account } })
 
         successResponse({ res, message: "User created successfully", data: { user } })
 

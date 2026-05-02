@@ -31,7 +31,6 @@ class UserService {
     }
 
     updatePassword = async (req:Request,res:Response,next:NextFunction) => {
-
         const {password,nPassword,cPassword} = req.body
         const user = await this._userModel.findOneWithPassword({
             filter: { _id: req.user._id }
@@ -50,6 +49,8 @@ class UserService {
             filter: { _id: user._id },
             update: {password:hashNPassword},
         }) 
+        user.changeCredential = new Date()
+        await user.save()
         successResponse({ res, message: "Your password updated successfully" })
     }
 

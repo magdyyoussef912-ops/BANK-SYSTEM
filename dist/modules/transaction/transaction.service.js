@@ -105,13 +105,11 @@ class TransactionService {
             await Promise.all([
                 this._accountModel.findOneAndUpdate({
                     filter: { userId: req.user?._id },
-                    update: { $inc: { balance: -amount } },
-                    options: { session }
+                    update: { $inc: { balance: -amount } }
                 }),
                 this._accountModel.findOneAndUpdate({
                     filter: { _id: receiverAccount._id },
-                    update: { $inc: { balance: amount } },
-                    options: { session }
+                    update: { $inc: { balance: amount } }
                 })
             ]);
             const transfer = await this._transactionModel.create({

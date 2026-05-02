@@ -22,7 +22,7 @@ const port = PORT
 export const bootstrap = () => {
 
     const limiter = rateLimit({
-        windowMs: 15 * 60 * 1000,
+        windowMs: 15 * 60 * 1000, // 15 minutes
         max: 100,
         message: "Too many requests, please try again later",
         handler: (req: Request, res: Response) => {
@@ -34,7 +34,7 @@ export const bootstrap = () => {
 
     const corsOptions = {
         origin: function(origin:string|undefined, callback:Function) {
-            if([...WHITE_LIST].includes(origin!)) {
+            if([...WHITE_LIST, undefined].includes(origin!)) {
                 callback(null, true)
             } else {
                 callback(new AppError("Not allowed by CORS", 403))
@@ -54,11 +54,11 @@ export const bootstrap = () => {
     })
 
     app.use("/auth", authRouter)
+    app.use("/user", userRouter)
     app.use("/account", accountRouter)
     app.use("/transaction", transactionRouter)
     app.use("/beneficiary", beneficiaryRouter)
     app.use("/card", creditCardRouter)
-    app.use("/user", userRouter)
     app.use("/admin", adminRouter)
 
     app.use("{/*demo}", (req: Request, res: Response, next: NextFunction) => {

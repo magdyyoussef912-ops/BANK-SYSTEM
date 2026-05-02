@@ -37,7 +37,7 @@ exports.statusSchema = void 0;
 const z = __importStar(require("zod"));
 exports.statusSchema = {
     query: z.object({
-        from: z.date(),
-        to: z.date()
+        from: z.string(),
+        to: z.string()
     })
 };
