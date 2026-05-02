@@ -1,3 +1,4 @@
 /node_modules
 /.env.*
 /nodejs_backend_bank_exam-final.pdf
+/dist
