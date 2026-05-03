@@ -1,0 +1,1008 @@
+{
+  "info": {
+    "_postman_id": "ba95bf12-6d5c-49c2-a32c-3229c0f050f4",
+    "name": "Bank System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "50885271",
+    "_collection_link": "https://go.postman.co/collection/50885271-ba95bf12-6d5c-49c2-a32c-3229c0f050f4?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "register",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"fullName\": \"Admin Admin\",\r\n    \"email\": \"Admin@gmail.com\",\r\n    \"password\": \"youssef@123\",\r\n    \"role\": \"admin\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{local_host}}/auth/register",
+              "host": [
+                "{{local_host}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "log in",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "let response = pm.response.json()\r",
+                  "pm.environment.set(\"access_token\",response.data.access_token)\r",
+                  "pm.environment.set(\"refresh_token\",response.data.refresh_token)"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"Admin@gmail.com\",\r\n    \"password\": \"youssef@123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{local_host}}/auth/login",
+              "host": [
+                "{{local_host}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "refresh token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{prefix}} {{refresh_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{local_host}}/auth/refresh-token",
+              "host": [
+                "{{local_host}}"
+              ],
+              "path": [
+                "auth",
+                "refresh-token"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "logOut",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{prefix}} {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{local_host}}/auth/logout",
+              "host": [
+                "{{local_host}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "user",
+      "item": [
+        {
+          "name": "get all accounts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{prefix}} {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{local_host}}/user/me/accounts",
+              "host": [
+                "{{local_host}}"
+              ],
+              "path": [
+                "user",
+                "me",
+                "accounts"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update profile info",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{prefix}} {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"fullName\":\"joao new\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{local_host}}/user/update-info",
+              "host": [
+                "{{local_host}}"
+              ],
+              "path": [
+                "user",
+                "update-info"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update password",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{prefix}} {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{local_host}}/user/update-password",
+              "host": [
+                "{{local_host}}"
+              ],
+              "path": [
+                "user",
+                "update-password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "del user",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{prefix}} {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{local_host}}/user/me",
+              "host": [
+                "{{local_host}}"
+              ],
+              "path": [
+                "user",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "account",
+      "item": [
+        {
+          "name": "create Account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{prefix}} {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{local_host}}/account/create",
+              "host": [
+                "{{local_host}}"
+              ],
+              "path": [
+                "account",
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get account",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{prefix}} {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{local_host}}/account/me",
+              "host": [
+                "{{local_host}}"
+              ],
+              "path": [
+                "account",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "status",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "card",
+      "item": [
+        {
+          "name": "add card",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{prefix}} {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"bankName\": \"CIB\",\r\n    \"cardType\": \"visa\",\r\n    // \"cardNumber\": \"\",\r\n    \"password\": \"9450\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{local_host}}/card/AddCard",
+              "host": [
+                "{{local_host}}"
+              ],
+              "path": [
+                "card",
+                "AddCard"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get all cards",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{prefix}} {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{local_host}}/user/me/accounts",
+              "host": [
+                "{{local_host}}"
+              ],
+              "path": [
+                "user",
+                "me",
+                "accounts"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "card default",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{prefix}} {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{local_host}}/card/setDefaultCard/69f0c4bd19dbc098bbaf724f",
+              "host": [
+                "{{local_host}}"
+              ],
+              "path": [
+                "card",
+                "setDefaultCard",
+                "69f0c4bd19dbc098bbaf724f"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete card",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{local_host}}/card/deleteCard/69ef0da79c06b422eaf890c8",
+              "host": [
+                "{{local_host}}"
+              ],
+              "path": [
+                "card",
+                "deleteCard",
+                "69ef0da79c06b422eaf890c8"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "transaction",
+      "item": [
+        {
+          "name": "deposit",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{prefix}} {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"amount\": 1000,\r\n    \"cardId\": \"69f0c4bd19dbc098bbaf724f\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{local_host}}/transaction/deposit",
+              "host": [
+                "{{local_host}}"
+              ],
+              "path": [
+                "transaction",
+                "deposit"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "withdraw",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{prefix}} {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"amount\": 1000\r\n    // \"cardId\": \"69f0c4bd19dbc098bbaf724f\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{local_host}}/transaction/withdraw",
+              "host": [
+                "{{local_host}}"
+              ],
+              "path": [
+                "transaction",
+                "withdraw"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "transfer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{prefix}} {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"amount\": 500,\r\n    \"beneficiaryId\": \"69f0b9c70cce6a02d5a70bb0\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{local_host}}/transaction/transfer",
+              "host": [
+                "{{local_host}}"
+              ],
+              "path": [
+                "transaction",
+                "transfer"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get all transaction",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
+        },
+        {
+          "name": "get transaction by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{local_host}}/transaction/69e3a9a527435c625456f165",
+              "host": [
+                "{{local_host}}"
+              ],
+              "path": [
+                "transaction",
+                "69e3a9a527435c625456f165"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "summary",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Beneficiary",
+      "item": [
+        {
+          "name": "create Beneficiary",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{prefix}} {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"bankName\": \"CIB\",\r\n    \"nickName\": \"joao\",\r\n    \"accountNumber\": \"12816444622152\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{local_host}}/beneficiary/addBeneficiary",
+              "host": [
+                "{{local_host}}"
+              ],
+              "path": [
+                "beneficiary",
+                "addBeneficiary"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "New Request",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{prefix}} {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{local_host}}/beneficiary/getAllBeneficiary",
+              "host": [
+                "{{local_host}}"
+              ],
+              "path": [
+                "beneficiary",
+                "getAllBeneficiary"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete beneficiary",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{prefix}} {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{local_host}}/beneficiary/deleteBeneficiary/69f0b9dd0cce6a02d5a70bb2",
+              "host": [
+                "{{local_host}}"
+              ],
+              "path": [
+                "beneficiary",
+                "deleteBeneficiary",
+                "69f0b9dd0cce6a02d5a70bb2"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "user",
+          "item": [
+            {
+              "name": "get All users",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "authorization",
+                    "value": "{{prefix}} {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{local_host}}/admin/users?page=1&limit=10",
+                  "host": [
+                    "{{local_host}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "users"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "get user  by id",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "authorization",
+                    "value": "{{prefix}} {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{local_host}}/admin/user/69f095df53a5af6c7802b3ef",
+                  "host": [
+                    "{{local_host}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "user",
+                    "69f095df53a5af6c7802b3ef"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "block user",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "authorization",
+                    "value": "{{prefix}} {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{local_host}}/admin/user/69f095df53a5af6c7802b3ef/block",
+                  "host": [
+                    "{{local_host}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "user",
+                    "69f095df53a5af6c7802b3ef",
+                    "block"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "unblock user",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "authorization",
+                    "value": "{{prefix}} {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{local_host}}/admin/user/69f095df53a5af6c7802b3ef/unBlock",
+                  "host": [
+                    "{{local_host}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "user",
+                    "69f095df53a5af6c7802b3ef",
+                    "unBlock"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "delete user",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "authorization",
+                    "value": "{{prefix}} {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{local_host}}/admin/user/69f095df53a5af6c7802b3ef/delete",
+                  "host": [
+                    "{{local_host}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "user",
+                    "69f095df53a5af6c7802b3ef",
+                    "delete"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "account",
+          "item": [
+            {
+              "name": "get all accounts",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "authorization",
+                    "value": "{{prefix}} {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{local_host}}/admin/accounts?limit=10&page=1",
+                  "host": [
+                    "{{local_host}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "accounts"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "10"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "block account",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "authorization",
+                    "value": "{{prefix}} {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{local_host}}/admin/accounts/69f0c47919dbc098bbaf724d/block",
+                  "host": [
+                    "{{local_host}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "accounts",
+                    "69f0c47919dbc098bbaf724d",
+                    "block"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "un block account",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "authorization",
+                    "value": "{{prefix}} {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{local_host}}/admin/accounts/69f0c47919dbc098bbaf724d/unBlock",
+                  "host": [
+                    "{{local_host}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "accounts",
+                    "69f0c47919dbc098bbaf724d",
+                    "unBlock"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "cards",
+          "item": [
+            {
+              "name": "get All crads",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "authorization",
+                    "value": "{{prefix}} {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{local_host}}/admin/cards?limit=10&page=1",
+                  "host": [
+                    "{{local_host}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "cards"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "10"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "block crad",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "authorization",
+                    "value": "{{prefix}} {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{local_host}}/admin/cards/69f0c4bd19dbc098bbaf724f/block",
+                  "host": [
+                    "{{local_host}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "cards",
+                    "69f0c4bd19dbc098bbaf724f",
+                    "block"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "transaction",
+          "item": [
+            {
+              "name": "get all transaction",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "authorization",
+                    "value": "{{prefix}} {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{local_host}}/admin/transaction?limit=10&page=2",
+                  "host": [
+                    "{{local_host}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "transaction"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "10"
+                    },
+                    {
+                      "key": "page",
+                      "value": "2"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "dashBoard",
+          "item": [
+            {
+              "name": "dashboard",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "authorization",
+                    "value": "{{prefix}} {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{local_host}}/admin/dashBoard",
+                  "host": [
+                    "{{local_host}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "dashBoard"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
