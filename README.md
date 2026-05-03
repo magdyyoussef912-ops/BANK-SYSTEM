@@ -2,6 +2,7 @@
 
 A production-grade RESTful banking API built with **Node.js**, **TypeScript**, **Express**, and **MongoDB**. Supports user registration, authentication with refresh tokens, account management, credit card management, deposits, withdrawals, atomic transfers, beneficiary management, and a full admin panel.
 
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://raw.githubusercontent.com/magdyyoussef912-ops/BANK-SYSTEM/main/Bank%20System.postman_collection.json)
 ---
 
 ## 🛠️ Tech Stack
