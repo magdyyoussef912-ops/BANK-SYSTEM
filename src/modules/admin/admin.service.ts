@@ -169,20 +169,24 @@ class adminService {
     }
 
     //Dashboard
-    Dashboard = async(req:Request,res:Response,next:NextFunction)=>{
-        const [user,account,card,transaction] =await Promise.all([
+    Dashboard = async(req:Request, res:Response, next:NextFunction) => {
+        const [users, accounts, cards, transactions] = await Promise.all([
             this._userModel.find({ filter: {} }),
             this._accountModel.find({ filter: {} }),
             this._cardModel.find({ filter: {} }),
             this._transactionModel.find({ filter: {} })
         ])
+
+        const totalVolume = transactions.reduce((sum: number, t: any) => sum + t.amount, 0)
+
         successResponse({res,
-            message:"Your Dashboard",
-            data:{
-                TotalUsers:user.length,
-                TotalAccounts:account.length,
-                TotalCards:card.length,
-                TotalTransactions:transaction.length
+            message: "Your Dashboard",
+            data: {
+                totalUsers: users.length,
+                totalAccounts: accounts.length,
+                totalCards: cards.length,
+                totalTransactions: transactions.length,
+                totalVolume
             }
         })
     }
