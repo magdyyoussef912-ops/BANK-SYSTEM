@@ -1,6 +1,6 @@
 # 🏦 Bank System API
 
-A RESTful banking API built with **Node.js**, **TypeScript**, **Express**, and **MongoDB**. Supports user registration, account management, deposits, withdrawals, atomic transfers, and beneficiary management.
+A production-grade RESTful banking API built with **Node.js**, **TypeScript**, **Express**, and **MongoDB**. Supports user registration, authentication with refresh tokens, account management, credit card management, deposits, withdrawals, atomic transfers, beneficiary management, and a full admin panel.
 
 ---
 
@@ -10,7 +10,8 @@ A RESTful banking API built with **Node.js**, **TypeScript**, **Express**, and *
 - **Language:** TypeScript
 - **Framework:** Express 5
 - **Database:** MongoDB + Mongoose
-- **Authentication:** JWT (Access Token)
+- **Cache:** Redis (Upstash)
+- **Authentication:** JWT (Access Token + Refresh Token)
 - **Validation:** Zod
 - **Security:** bcrypt, helmet, cors, express-rate-limit
 
@@ -20,6 +21,7 @@ A RESTful banking API built with **Node.js**, **TypeScript**, **Express**, and *
 
 - [Node.js](https://nodejs.org/) v18+
 - [MongoDB](https://www.mongodb.com/) (local or Atlas)
+- [Redis](https://upstash.com/) (Upstash or local)
 - npm
 
 ---
@@ -42,10 +44,10 @@ npm install
 ### 3. Set up environment variables
 
 ```bash
-cp .env.example .env.development
+cp .env.development .env.development
 ```
 
-Then fill in your values.
+Then fill in your values (see Environment Variables section).
 
 ### 4. Run the project
 
@@ -61,13 +63,19 @@ npm run start:prod
 
 ## 🔐 Environment Variables
 
-| Variable           | Description                             | Example                          |
-|--------------------|-----------------------------------------|----------------------------------|
-| `PORT`             | Port the server runs on                 | `3000`                           |
-| `LOCAL_URI_DB`     | MongoDB connection string               | `mongodb://localhost:27017/bank` |
-| `SALT_ROUNDS`      | bcrypt salt rounds                      | `10`                             |
-| `ACCESS_TOKEN_KEY` | Secret key for signing access tokens    | `your_strong_secret`             |
-| `PREFIX`           | Authorization header prefix             | `Bearer`                         |
+| Variable             | Description                              | Example                          |
+|----------------------|------------------------------------------|----------------------------------|
+| `PORT`               | Port the server runs on                  | `3000`                           |
+| `LOCAL_URI_DB`       | MongoDB local connection string          | `mongodb://localhost:27017/bank` |
+| `DB_URI_ONLINE`      | MongoDB Atlas connection string          | `mongodb+srv://...`              |
+| `SALTROUNDS`         | bcrypt salt rounds                       | `12`                             |
+| `ACCESS_TOKEN_KEY`   | Secret key for signing access tokens     | `your_strong_secret`             |
+| `REFRESH_TOKEN_KEY`  | Secret key for signing refresh tokens    | `your_strong_secret`             |
+| `PREFIX`             | Authorization header prefix              | `Bearer`                         |
+| `REDIS_URL`          | Redis connection string                  | `rediss://...`                   |
+| `WHITE_LIST`         | Allowed CORS origins (comma-separated)   | `http://localhost:5173`          |
+| `EMAIL`              | Email for notifications                  | `your@email.com`                 |
+| `PASSWORD`           | Email app password                       | `your_app_password`              |
 
 > ⚠️ Never commit your real `.env` files to version control.
 
@@ -86,45 +94,32 @@ src/
 │   └── model/                      # Mongoose models
 │       ├── user.model.ts
 │       ├── bankAccount.model.ts
+│       ├── creditCard.model.ts
 │       ├── transaction.model.ts
 │       └── beneficiary.model.ts
 ├── common/
 │   ├── middleware/
-│   │   ├── authentication.ts       # JWT verification
+│   │   ├── authentication.ts       # JWT verification + Redis token revocation
 │   │   ├── authorization.ts        # Role-based access control
 │   │   └── validation.ts           # Zod validation
-│   ├── utils/
-│   │   ├── success.Responsive.ts
-│   │   ├── error.global.handler.ts
-│   │   └── security/
-│   │       ├── hash.security.ts
-│   │       └── token.service.ts
-│   └── enum/                       # Shared enums
+│   ├── service/
+│   │   └── redis.service.ts        # Redis cache service
+│   └── utils/
+│       ├── success.Responsive.ts
+│       ├── error.global.handler.ts
+│       └── security/
+│           ├── hash.security.ts    # bcrypt hash & compare
+│           └── token.service.ts    # JWT sign & verify
 ├── modules/
+│   ├── auth/
 │   ├── user/
-│   │   ├── auth.controller.ts
-│   │   ├── auth.service.ts
-│   │   ├── auth.validation.ts
-│   │   └── user.repository.ts
 │   ├── account/
-│   │   ├── account.controller.ts
-│   │   ├── account.service.ts
-│   │   ├── account.validation.ts
-│   │   └── account.repository.ts
+│   ├── card/
 │   ├── transaction/
-│   │   ├── transaction.controller.ts
-│   │   ├── transaction.service.ts
-│   │   ├── transaction.validation.ts
-│   │   └── transaction.repository.ts
-│   └── beneficiary/
-│       ├── beneficiary.controller.ts
-│       ├── beneficiary.service.ts
-│       ├── beneficiary.validation.ts
-│       └── beneficiary.repository.ts
-├── repositories/
-│   └── base.repository.ts          # Generic CRUD operations
-└── types/
-    └── express.d.ts                # Express type extensions
+│   ├── beneficiary/
+│   └── admin/
+└── repositories/
+    └── base.repository.ts          # Generic CRUD operations
 ```
 
 ---
@@ -133,22 +128,48 @@ src/
 
 ### Auth — `/auth`
 
-| Method | Endpoint         | Description         | Auth |
-|--------|------------------|---------------------|------|
-| POST   | `/auth/register` | Register a new user | ❌   |
-| POST   | `/auth/login`    | Login & get token   | ❌   |
+| Method | Endpoint               | Description                        | Auth |
+|--------|------------------------|------------------------------------|------|
+| POST   | `/auth/register`       | Register a new user                | ❌   |
+| POST   | `/auth/login`          | Login & get access + refresh token | ❌   |
+| POST   | `/auth/refresh-token`  | Get new access token               | 🔄   |
+| POST   | `/auth/logout`         | Logout (current or all devices)    | ✅   |
+
+> 🔄 = requires Refresh Token in Authorization header
+> 
+> **Logout all devices:** `POST /auth/logout?flag=All`
+
+### User — `/user`
+
+| Method | Endpoint                 | Description                     | Auth |
+|--------|--------------------------|---------------------------------|------|
+| GET    | `/user/me`               | Get current user profile        | ✅   |
+| PATCH  | `/user/update-info`      | Update full name                | ✅   |
+| PATCH  | `/user/update-password`  | Change password                 | ✅   |
+| GET    | `/user/me/accounts`      | Get accounts with linked cards  | ✅   |
+| DELETE | `/user/me`               | Delete account (zero balance)   | ✅   |
 
 ### Account — `/account`
 
 | Method | Endpoint          | Description                         | Auth |
 |--------|-------------------|-------------------------------------|------|
-| GET    | `/account/me`     | Get current user's account          | ✅   |
+| POST   | `/account/create` | Create a bank account               | ✅   |
+| GET    | `/account/me`     | Get current user's account(s)       | ✅   |
 | GET    | `/account/status` | Get account statement by date range | ✅   |
 
 **Query params for `/account/status`:**
 ```
 ?from=2024-01-01&to=2024-12-31
 ```
+
+### Credit Cards — `/card`
+
+| Method | Endpoint                       | Description                      | Auth |
+|--------|--------------------------------|----------------------------------|------|
+| POST   | `/card/AddCard`                | Add a new credit card            | ✅   |
+| GET    | `/card/getAllCards`             | Get all user's cards             | ✅   |
+| PATCH  | `/card/setDefaultCard/:cardId` | Set card as default              | ✅   |
+| DELETE | `/card/deleteCard/:cardId`     | Delete card and linked account   | ✅   |
 
 ### Transactions — `/transaction`
 
@@ -168,21 +189,47 @@ src/
 
 ### Beneficiary — `/beneficiary`
 
-| Method | Endpoint                      | Description           | Auth |
-|--------|-------------------------------|-----------------------|------|
-| POST   | `/beneficiary/addBeneficiary` | Add a new beneficiary | ✅   |
+| Method | Endpoint                              | Description              | Auth |
+|--------|---------------------------------------|--------------------------|------|
+| POST   | `/beneficiary/addBeneficiary`         | Add a new beneficiary    | ✅   |
+| GET    | `/beneficiary/getAllBeneficiary`       | Get all beneficiaries    | ✅   |
+| DELETE | `/beneficiary/deleteBeneficiary/:id`  | Delete a beneficiary     | ✅   |
+
+### Admin — `/admin` 🔒
+
+> All admin routes require `role: admin`
+
+| Method | Endpoint                          | Description                    |
+|--------|-----------------------------------|--------------------------------|
+| GET    | `/admin/dashBoard`                | System-wide statistics         |
+| GET    | `/admin/users`                    | Get all users (paginated)      |
+| GET    | `/admin/user/:userId`             | Get specific user              |
+| PATCH  | `/admin/user/:userId/block`       | Block a user                   |
+| PATCH  | `/admin/user/:userId/unBlock`     | Unblock a user                 |
+| DELETE | `/admin/user/:userId/delete`      | Delete a user                  |
+| GET    | `/admin/accounts`                 | Get all accounts (paginated)   |
+| PATCH  | `/admin/accounts/:accountId/block`   | Block an account            |
+| PATCH  | `/admin/accounts/:accountId/unBlock` | Unblock an account          |
+| GET    | `/admin/cards`                    | Get all cards (paginated)      |
+| PATCH  | `/admin/cards/:cardId/block`      | Block a card                   |
+| GET    | `/admin/transaction`              | Get all transactions (paginated)|
 
 ---
 
 ## 🔑 Authentication
 
-All protected routes require a JWT token in the `Authorization` header:
+All protected routes require a JWT access token in the `Authorization` header:
 
 ```
 Authorization: Bearer <your_access_token>
 ```
 
 You get the token from `/auth/login`.
+
+### Token Strategy
+- **Access Token** — short-lived, stored in memory
+- **Refresh Token** — long-lived, stored in localStorage
+- **Token Revocation** — handled via Redis on logout
 
 ---
 
@@ -194,7 +241,7 @@ POST /auth/register
 {
   "fullName": "Magdy Youssef",
   "email": "magdy@example.com",
-  "password": "StrongPassword123"
+  "password": "StrongPass@123"
 }
 ```
 
@@ -203,7 +250,19 @@ POST /auth/register
 POST /auth/login
 {
   "email": "magdy@example.com",
-  "password": "StrongPassword123"
+  "password": "StrongPass@123"
+}
+```
+
+### Add Credit Card
+```json
+POST /card/AddCard
+Authorization: Bearer <token>
+
+{
+  "bankName": "CIB",
+  "cardType": "visa",
+  "password": "1234"
 }
 ```
 
@@ -227,6 +286,17 @@ Authorization: Bearer <token>
 }
 ```
 
+### Transfer
+```json
+POST /transaction/transfer
+Authorization: Bearer <token>
+
+{
+  "beneficiaryId": "64f1a2b3c4d5e6f7a8b9c0d1",
+  "amount": 200
+}
+```
+
 ### Add Beneficiary
 ```json
 POST /beneficiary/addBeneficiary
@@ -239,17 +309,6 @@ Authorization: Bearer <token>
 }
 ```
 
-### Transfer
-```json
-POST /transaction/transfer
-Authorization: Bearer <token>
-
-{
-  "beneficiaryId": "64f1a2b3c4d5e6f7a8b9c0d1",
-  "amount": 200
-}
-```
-
 ---
 
 ## 🔒 Security Features
@@ -257,7 +316,9 @@ Authorization: Bearer <token>
 - Passwords hashed with **bcrypt**
 - HTTP headers secured with **helmet**
 - Rate limiting — max **100 requests / 15 minutes**
-- JWT authentication on all protected routes
+- JWT authentication with **Access + Refresh Token** strategy
+- **Token revocation** via Redis on logout
 - Role-based authorization middleware
 - **Atomic transfers** using MongoDB sessions — no partial transactions
 - Password field excluded from all API responses
+- CORS whitelist protection
