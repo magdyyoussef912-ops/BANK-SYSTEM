@@ -20,5 +20,36 @@ export const signinSchema = {
         })
 }
 
+export const confirmEmailSchema = {
+    body :z.object({
+            email : z.string().email(),
+            code : z.string().min(6).max(6).regex(/^\d{6}$/)
+        })
+}
+
+
+export const resendOtpSchema = {
+    body : z.object({
+        email : z.string().email(),
+    })
+} 
+
+
+
+export const forgetPasswordSchema = {
+    body : z.object({
+        email : z.string().email(),
+    })
+} 
+
+
+export const resetPasswordSchema = {
+    body : z.object({
+        email : z.string().email(),
+        code: z.string().regex(/^\d{6}$/),
+        nPassword:z.string().regex(/^(?=.*[A-Za-z])(?=.*[^A-Za-z0-9]).{8,}$/)
+    }) 
+}
+
 
 

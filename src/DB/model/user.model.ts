@@ -1,6 +1,6 @@
 import mongoose, { Document } from "mongoose";
 
-import { RoleEnum, StatusEnumUser } from "../../common/enum/user.enum";
+import { ProviderEnum, RoleEnum, StatusEnumUser } from "../../common/enum/user.enum";
 
 
 export interface IUser extends Document {
@@ -11,7 +11,9 @@ export interface IUser extends Document {
     createdAt:Date,
     updatedAt:Date
     changeCredential:Date
-    status:StatusEnumUser
+    status:StatusEnumUser,
+    provider:ProviderEnum,
+    confirmed:boolean
 }
 
 
@@ -33,7 +35,12 @@ const userSchema = new mongoose.Schema<IUser>({
     password:{
         type:String,
         trim:true,
-        required:true,
+        required:function(){
+            if (this.provider === ProviderEnum.System) {
+                return true
+            }
+            return false
+        },
         select:false
     },
     role:{
@@ -46,7 +53,13 @@ const userSchema = new mongoose.Schema<IUser>({
         type:String,
         enum:StatusEnumUser,
         default:StatusEnumUser.Active
-    }
+    },
+    provider:{
+        type:String,
+        enum:ProviderEnum,
+        default:ProviderEnum.System
+    },
+    confirmed:Boolean
 },{
     timestamps:true,
     strict:true,

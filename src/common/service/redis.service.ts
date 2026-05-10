@@ -1,6 +1,7 @@
 import { createClient, RedisClientType } from "redis";
 import { REDIS_URL } from "../../config/config.service";
 import { Types } from "mongoose";
+import { EmailEnum } from "../enum/user.enum";
 
 
 class redisService{
@@ -37,11 +38,35 @@ class redisService{
     revoked_id_token = ({userId}:{userId:string|Types.ObjectId})=>{
         return `revoke_token::${userId}`
     } 
+
+
+    otp_key = ({email,subject}:{email:string,subject:EmailEnum})=>{
+        return `otp::${email}::${subject}`
+    }
+    
+    max_otp_key = ({email}:{email:string})=>{
+        return `otp::${email}::max_tries`
+    }
+    
+    block_otp_key = ({email}:{email:string})=>{
+        return `otp::${email}::block`
+    }
+    
+    max_pass_key = ({email}:{email:string})=>{
+        return `password::${email}::max_tries_password`
+    }
+    
+    
+    block_pass_key = ({email}:{email:string})=>{
+        return `password::${email}::block_password`
+    }
     
     
     setValue = async ({key,value,ttl}:{key:string,value:string|number|object,ttl?:number})=>{
         try {
-            const data = typeof(value) == "string" ? value : JSON.stringify(value)
+            const data = typeof(value) == "object"
+            ? JSON.stringify(value)
+            : String(value)
             return  ttl ? await this.Client.set(key,data,{EX:ttl}) :  await this.Client.set(key,data)
         } catch (error) {
             console.log(error,"fail to set operation");        
