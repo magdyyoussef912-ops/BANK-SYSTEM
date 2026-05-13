@@ -14,6 +14,7 @@ import creditCardRouter from "./modules/card/card.controller"
 import userRouter from "./modules/user/user.controller"
 import redisService from "./common/service/redis.service"
 import adminRouter from "./modules/admin/admin.controller"
+import mongoSanitize from "express-mongo-sanitize"
 
 const app = express()
 
@@ -43,7 +44,7 @@ export const bootstrap = () => {
         credentials: true
     }
 
-    app.use(express.json(), cors(corsOptions), helmet(), limiter)
+    app.use(express.json(), cors(corsOptions), helmet(), limiter,mongoSanitize())
 
     checkConnectionDB()
 
